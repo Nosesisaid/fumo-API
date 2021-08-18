@@ -7,6 +7,7 @@ var db = require('./db');
 var RandomController = require("./random/controller");
 app.use("/random", RandomController);
 app.use("/fumos", fumosController)
+app.use("/fumo", RandomController)
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 100,
