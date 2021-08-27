@@ -1,5 +1,6 @@
 # fumo rest API
-
+## Issues
+If you find a repeated fumo please create an issue
 ## Objects
 
 ### Fumo
