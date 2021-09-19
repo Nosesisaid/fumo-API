@@ -48,7 +48,7 @@
     "mongoose": "^5.13.7",
     "mongoose-legacy-pluralize": "^1.0.2",
     "morgan": "^1.10.0",
-    "mpath": "^0.8.3",
+    "mpath": "^0.8.4",
     "mquery": "^3.2.5",
     "ms": "^2.0.0",
     "negotiator": "^0.6.2",
