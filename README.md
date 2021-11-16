@@ -17,16 +17,16 @@ If you find a repeated fumo please create an issue
 
 ### <code>/random</code>
 
-return a random fumo object.
+Return a random fumo object.
 
 ### <code> /fumos</code>
 
-fumo list.
+Fumo list.
 
 #### <code>/</code>
 
-retrun the full fumo list.
+Return the full fumo list.
 
 #### <code>/id</code>
 
-return the fumo object whit the provided id.
+Return the fumo object with the provided ID.
