@@ -1,32 +1,25 @@
-# fumo rest API
-## Issues
-If you find a repeated fumo please create an issue
-## Objects
+---
+description: Welcome to the fumo-API docs & guide
+---
 
-### Fumo
+# Welcome!
 
-```json
-{
-  "_id": "fumo id",
-  "URL": "fumo image url",
-  "__v": 0
-}
-```
+## Welcome to fumo-API
 
-## Paths
+Welcome to MyAPI! Here you'll find all the documentation you need to get up and running with the fumo-API.
 
-### <code>/random</code>
+## Want to jump right in?
 
-Return a random fumo object.
+Feeling like an eager beaver? Jump in to the quick start docs and get making your first request:
 
-### <code> /fumos</code>
+{% content-ref url="quick-start.md" %}
+[quick-start.md](quick-start.md)
+{% endcontent-ref %}
 
-Fumo list.
+## Want to deep dive?
 
-#### <code>/</code>
+Dive a little deeper and start exploring our API reference to get an idea of everything that's possible with the API:
 
-Return the full fumo list.
-
-#### <code>/id</code>
-
-Return the fumo object with the provided ID.
+{% content-ref url="reference/api-reference/" %}
+[api-reference](reference/api-reference/)
+{% endcontent-ref %}
