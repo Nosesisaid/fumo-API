@@ -8,15 +8,15 @@ If you find a repeated fumo please create an issue
 
 ### Fumo
 
-```json
+```ts
 {
-  "_id": "fumo id",
-  "URL": "fumo image url",
-  "__v": 0
+  "_id": String,
+  "URL": String,
+  "__v": Number
 }
 ```
 
-## Paths
+## Endpoints
 
 ### <code>/random</code>
 
