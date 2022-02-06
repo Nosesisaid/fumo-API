@@ -9,5 +9,6 @@
   "dependencies": {
     "fastify": "^3.27.1",
     "fastify-mongodb": "^4.1.1"
-  }
+  },
+  "type": "module"
 }
