@@ -1,0 +1,54 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+  push:
+    branches:
+      - master
+      - typescript+fastify
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize]
+
+jobs:
+  avoid_redundancy: 
+      runs-on: ubuntu-18.04
+      steps:
+        - name: Cancel Previous Redundant Builds
+          uses: styfle/cancel-workflow-action@0.9.1
+          with:
+            access_token: ${{ github.token }}
+            
+  lint:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v2
+        with:
+          cache: 'yarn'
+          node-version: '16'
+      - name: Install dependencies
+        run: yarn
+      - name: Lint
+        run: yarn run lint
+
+  test:
+    needs: [ lint ]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - run: yarn 
+    - run: yarn run build
+    - run: yarn test
+      env: 
+        MONGO_URL: ${{ secrets.MONGOURL }}
