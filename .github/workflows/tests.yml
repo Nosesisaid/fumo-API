@@ -36,27 +36,8 @@ jobs:
       - name: Lint
         run: yarn run lint
 
-  build:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v2
-        with:
-          cache: 'yarn'
-          node-version: '16'
-      - name: Install dependencies
-        run: yarn
-      - name: Build
-        run: yarn run build
-      - uses: actions/upload-artifact@v2
-        with:
-          name: dist
-          path: dist
-
   test:
-    needs: [ lint, build ]
+    needs: [ lint ]
     runs-on: ubuntu-latest
 
     steps:
@@ -67,6 +48,7 @@ jobs:
       with:
         fetch-depth: 0
     - run: yarn 
+    - run: yarn run build
     - run: yarn test
       env: 
         MONGO_URL: ${{ secrets.MONGOURL }}
