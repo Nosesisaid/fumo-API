@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v2
         with:
-          cache: 'npm'
+          cache: 'yarn'
           node-version: '16'
       - name: Install dependencies
         run: yarn
@@ -44,7 +44,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v2
         with:
-          cache: 'npm'
+          cache: 'yarn'
           node-version: '16'
       - name: Install dependencies
         run: yarn
@@ -62,7 +62,7 @@ jobs:
     steps:
     - uses: actions/setup-node@v2
       with:
-        cache: 'npm'
+        cache: 'yarn'
         node-version: '16'
     - uses: actions/checkout@v3
       with:
@@ -71,7 +71,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        cache: 'yarn'
     - run: yarn 
     - run: yarn test
       env: 
