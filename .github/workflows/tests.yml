@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           cache: 'npm'
-          node-version: '18'
+          node-version: '16'
       - name: Install dependencies
         run: yarn
       - name: Lint
@@ -45,7 +45,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           cache: 'npm'
-          node-version: '18'
+          node-version: '16'
       - name: Install dependencies
         run: yarn
       - name: Build
@@ -63,7 +63,7 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         cache: 'npm'
-        node-version: '18'
+        node-version: '16'
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
