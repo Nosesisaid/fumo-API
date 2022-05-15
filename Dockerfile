@@ -7,5 +7,5 @@ RUN yarn install
 
 COPY . .
 RUN yarn build
-EXPOSE 8080
+EXPOSE 80
 CMD ["node", "dist/server.js"]
