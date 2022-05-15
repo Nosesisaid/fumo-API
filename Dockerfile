@@ -1,4 +1,3 @@
-LABEL org.opencontainers.image.source https://github.com/Nosesisaid/Fumo-API
 FROM node:18
 
 WORKDIR /app
