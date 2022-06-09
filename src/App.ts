@@ -15,7 +15,7 @@ function build(opts:FastifyServerOptions={}) {
 
 	App.get('/fumo/:id', async (req, res) => {
 
-		const id = new App.mongo.ObjectId((req as any).params.id);
+		const id = (req as any).params.id;
 		const fumo = await (await App.mongo.db?.collection('fumos'))?.findOne({_id: id});
 
 		res.status(200).send(fumo);
