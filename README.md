@@ -1,10 +1,15 @@
 # fumo API 
 [![Tests](https://github.com/Nosesisaid/fumo-API/actions/workflows/tests.yml/badge.svg)](https://github.com/Nosesisaid/fumo-API/actions/workflows/tests.yml)
+
 Rest API of images of fumos (japanese plushies) using typescript and fastify.
 
+![logo](https://repository-images.githubusercontent.com/395606928/753b9fdd-b978-4b74-841e-f3973daf9129)
 
-## Issues
-If you find a repeated fumo please create an issue
+## Contributing
+if you would like something to be different or have any suggestion, please [open an issue](https://github.com/nosesisaid/fumo-api/issues/new).
+
+
+⭐ Are apreciated.
 
 ## Running it locally 
 ### Using node 
