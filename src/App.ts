@@ -1,10 +1,16 @@
 import fastify, { FastifyServerOptions } from 'fastify';
 import fastifyMongodb from '@fastify/mongodb';
 import './config/env';
+import cors from '@fastify/cors';
+
 function build(opts:FastifyServerOptions={}) {
 	const App = fastify(opts);
+
 	App.register(fastifyMongodb, {
 		url: process.env.MONGO_URL
+	});
+	App.register(cors, {
+		origin: '*'
 	});
 
 	App.get('/', async (req, res) => {
