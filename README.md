@@ -4,7 +4,8 @@
 Rest API of images of fumos (japanese plushies) using typescript and fastify.
 
 ![logo](https://repository-images.githubusercontent.com/395606928/753b9fdd-b978-4b74-841e-f3973daf9129)
-
+## Documentation
+Documentation available at [fumo-api.nosesisaid.com/docs](https://fumo-api.nosesisaid.com/docs)
 ## Contributing
 if you would like something to be different or have any suggestion, please [open an issue](https://github.com/nosesisaid/fumo-api/issues/new).
 
