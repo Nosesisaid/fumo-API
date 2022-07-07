@@ -3,7 +3,7 @@ const {test} = require("tap");
 
 test('call `/fumo/id` route', async (t) => {
     t.plan(4)
-    const app = build();
+    const app = await build();
     const id = '6128c5578caf0cf9a83f73e8';
     const response = await app.inject({
         method: 'GET',
