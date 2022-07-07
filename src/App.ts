@@ -47,7 +47,7 @@ async function build(opts: FastifyServerOptions = {}, isTest = false) {
 						type: 'object',
 						required: ['id', 'URL'],
 						properties: {
-							id: { type: 'string'},
+							_id: { type: 'string'},
 							URL: { type: 'string' },
 							caption: { type: 'string' },
 							fumos: { type: 'array', } },
@@ -81,7 +81,7 @@ async function build(opts: FastifyServerOptions = {}, isTest = false) {
 					items: {
 						type: 'object',
 						properties: {
-							id: { type: 'string' },
+							_id: { type: 'string' },
 							URL: { type: 'string' },
 							caption: { type: 'string' },
 							fumos: { type: 'array', },
@@ -102,14 +102,14 @@ async function build(opts: FastifyServerOptions = {}, isTest = false) {
 			params: {
 				type: 'object',
 				properties: {
-					id: { type: 'string', description: 'The id of the fumo' },
+					_id: { type: 'string', description: 'The id of the fumo' },
 				},
 			},
 			response: {
 				200: {
 					type: 'object',
 					properties: {
-						id: { type: 'string' },
+						_id: { type: 'string' },
 						URL: { type: 'string' },
 						caption: { type: 'string' },
 						fumos: { type: 'array', },
@@ -118,12 +118,8 @@ async function build(opts: FastifyServerOptions = {}, isTest = false) {
 			},
 		},
 	}, async (req, res) => {
-		//TODO: fix this
-		const id = (req.params as { id: string }).id;
-		
-		const fumo = await (
-			await App.mongo.db?.collection('fumos')
-		)?.findOne({ _id: id });
+		const params = req.params;
+		const fumo = await (await App.mongo.db?.collection('fumos'))?.findOne({_id: (params as any).id});
 
 		res.status(200).send(fumo);
 	});
@@ -136,7 +132,7 @@ async function build(opts: FastifyServerOptions = {}, isTest = false) {
 				200: {
 					type: 'object',
 					properties: {
-						id: { type: 'string' },
+						_id: { type: 'string' },
 						URL: { type: 'string' },
 						caption: { type: 'string' },
 						fumos: { type: 'array', },
@@ -162,7 +158,7 @@ async function build(opts: FastifyServerOptions = {}, isTest = false) {
 					items: {
 						type: 'object',
 						properties: {
-							id: { type: 'string' },
+							_id: { type: 'string' },
 							URL: { type: 'string' },
 							caption: { type: 'string' },
 							fumos: { type: 'array', },
