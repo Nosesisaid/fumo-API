@@ -4,7 +4,7 @@ const { test } = require("tap");
 test('call `/` route', async (t) => {
     t.plan(2);
 
-    const app = build();
+    const app = await build();
     const response = await app.inject({
         method: 'GET',
         url:'/'

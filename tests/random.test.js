@@ -2,7 +2,7 @@ const build = require("../dist/App.js").default;
 const {test} = require("tap");
 test('call `/random` route', async (t) => {
     t.plan(2)
-    const app = build();
+    const app = await build();
     const response = await app.inject({
         method: 'GET',
         url:'/random'
