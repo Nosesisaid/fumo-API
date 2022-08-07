@@ -1,4 +1,5 @@
-import {PORT} from './config/env';
+import 'dotenv/config';
+const PORT = process.env.PORT || 3000;
 import build from './App';
 async function main() {
 	
