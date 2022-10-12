@@ -1,6 +1,5 @@
 # fumo API 
 [![Tests](https://github.com/Nosesisaid/fumo-API/actions/workflows/tests.yml/badge.svg)](https://github.com/Nosesisaid/fumo-API/actions/workflows/tests.yml)
-[![Discord](https://img.shields.io/badge/Nosesisaid-%237289DA.svg?style=plastic&logo=discord&logoColor=white)](https://discord.gg/8n2K8PVg)
 Rest API of images of fumos (japanese plushies) using typescript and fastify.
 
 
