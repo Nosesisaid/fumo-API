@@ -1,5 +1,16 @@
 # fumo API 
+# The project is currently down
+> [!WARNING]  
+> Official CDN is not currently working, since my education azure credit expired, the images are not aviable anymore. Therefore I guess the API is useless.
+
+
+> [!IMPORTANT]  
+> Please if you are willing to use this project for literally anything, let me know and I will try to make it usable again, you can create an Issue on this repo or [write to me](https://x.com/vicjajsalu2) Do it, for real. if you see this lmk.
+
+
 [![Tests](https://github.com/Nosesisaid/fumo-API/actions/workflows/tests.yml/badge.svg)](https://github.com/Nosesisaid/fumo-API/actions/workflows/tests.yml)
+
+
 Rest API of images of fumos (japanese plushies) using typescript and fastify.
 
 
@@ -9,8 +20,6 @@ Documentation available at [fumo-api.nosesisaid.com/docs](https://fumo-api.noses
 ## Contributing
 if you would like something to be different or have any suggestion, please [open an issue](https://github.com/nosesisaid/fumo-api/issues/new).
 
-
-⭐ Are apreciated.
 
 ## Running it locally 
 ### Using node 
