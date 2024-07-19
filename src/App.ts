@@ -92,7 +92,9 @@ async function build(opts: FastifyServerOptions = {}, isTest = false) {
 		},
 	},async (req, res) => {
 		const fumos = await App.mongo.db?.collection('fumos').find({}).toArray();	
-		res.status(200).send(fumos);
+		console.log(fumos);
+		const stringinizedFumos = JSON.stringify(fumos);
+		res.status(200).header('Content-Type','application/json').send(stringinizedFumos);
 	});
 
 	App.get('/fumo/:id',{
@@ -121,7 +123,9 @@ async function build(opts: FastifyServerOptions = {}, isTest = false) {
 		const params = req.params;
 		const fumo = await (await App.mongo.db?.collection('fumos'))?.findOne({_id: (params as any).id});
 
-		res.status(200).send(fumo);
+		const stringie = JSON.stringify(fumo);
+
+		res.status(200).header('Content-Type','application/json').send(stringie);
 	});
 
 	App.get('/random', {
@@ -145,7 +149,9 @@ async function build(opts: FastifyServerOptions = {}, isTest = false) {
 		if (!fumos) return res.status(400).send('No fumo :( (server error)');
 		const fumo = fumos[Math.floor(Math.random() * fumos?.length)];
 
-		res.status(200).send(fumo);
+		const stringie = JSON.stringify(fumo);
+
+		res.status(200).header('Content-Type','application/json').send(stringie);
 	});
 
 	App.get('/fumos', {
@@ -170,7 +176,7 @@ async function build(opts: FastifyServerOptions = {}, isTest = false) {
 	}, async (req, res) => {
 		const fumos = await App.mongo.db?.collection('fumos').find({}).toArray();
 
-		res.status(200).send(fumos);
+		res.status(200).header('Content-Type','application/json').send(JSON.stringify(fumos));
 	});
 	return App;
 }
