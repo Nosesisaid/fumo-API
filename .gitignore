@@ -1,5 +1,9 @@
-node_modules
-.env
-dist
-.nyc_output
-.vscode
+debug
+target
+**/*.rs.bk
+*.pdb
+**/mutants.out*/
+
+# Added by cargo
+
+/target
