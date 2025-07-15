@@ -1,4 +1,3 @@
-use diesel::sql_types::{Bool, Text, VarChar};
 
 diesel::table! {
     fumos (id) {

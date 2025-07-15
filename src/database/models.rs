@@ -1,4 +1,4 @@
-use diesel::{deserialize::FromSqlRow, expression::AsExpression, prelude::*};
+use diesel::prelude::*;
 
 use crate::database::schema;
 
@@ -6,7 +6,7 @@ use crate::database::schema;
 #[diesel(table_name = schema::fumos)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Fumo {
-    id: i32,
+    pub id: i32,
     caption: String,
     img: String,
     involved: Vec<String>,
@@ -14,4 +14,4 @@ pub struct Fumo {
 }
 
 
-pub const Fumos: [&str;3] = ["Cirno", "Reimu", "Remilia"];
+pub const INVOLVABLE: [&str;3] = ["Cirno", "Reimu", "Remilia"];
