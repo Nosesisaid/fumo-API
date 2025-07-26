@@ -1,4 +1,4 @@
-use diesel::{prelude::*};
+use diesel::{prelude::*, serialize};
 
 use crate::schema;
 
@@ -14,7 +14,7 @@ pub struct NewFumo<'a> {
     pub involved: Option<&'a [Option<String>]>
 }
 
-#[derive(Queryable,Selectable)]
+#[derive(Queryable,Selectable, serde::Serialize)]
 #[diesel(table_name = schema::fumos)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Fumo {
