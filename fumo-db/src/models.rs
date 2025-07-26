@@ -2,6 +2,18 @@ use diesel::{prelude::*};
 
 use crate::schema;
 
+
+#[derive(Insertable)]
+#[diesel(table_name = schema::fumos)]
+pub struct NewFumo<'a> {
+    pub caption: &'a str,
+    pub img: &'a str,
+    pub public: bool,
+    pub attribution: Option<&'a str>,
+    pub submitter: Option<&'a str>,
+    pub involved: Option<&'a [Option<String>]>
+}
+
 #[derive(Queryable,Selectable)]
 #[diesel(table_name = schema::fumos)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -15,4 +27,4 @@ pub struct Fumo {
 }
 
 
-pub const INVOLVABLE: [&str;3] = ["Cirno", "Reimu", "Remilia"];
+pub static INVOLVABLE: &[&str] = &["Cirno", "Reimu", "Remilia"];
