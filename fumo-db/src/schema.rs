@@ -10,6 +10,6 @@ diesel::table! {
         attribution -> Nullable<Text>,
         submission_time -> Timestamp,
         #[max_length = 32]
-        submitter -> Nullable<Varchar>,
+        submitter -> Varchar,
     }
 }
