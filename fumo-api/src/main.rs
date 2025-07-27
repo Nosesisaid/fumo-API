@@ -5,7 +5,7 @@ use std::{env, net::SocketAddr};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl, SelectableHelper};
 use dotenvy::dotenv;
 use axum::{
-    extract::{Query, State}, http::StatusCode, response::{IntoResponse, Json}, routing::{get, post}, Router, debug_handler
+    debug_handler, extract::{Path, Query, State}, http::StatusCode, response::{IntoResponse, Json}, routing::{get, post}, Router
 };
 use fumo_db::{create_pool, models::Fumo, DbPool};
 use serde::Deserialize;
@@ -43,7 +43,7 @@ async fn main() {
     .with_state(api_state);
 
 
-    println!("Hello, world!");
+    println!("Hello, world!. Trying to listen on {port}");
 
 
     let address = SocketAddr::from(([127,0,0,1],port));
@@ -56,7 +56,17 @@ fn admin()-> Router<AppState> {
     todo!("all the database editing stuff")
 }
 
-    
+
+fn fumo() -> Router<AppState> {
+
+    //todo!("All the reading stuff")
+    Router::new()
+    .route("/fumos/list_all",get(list_all))
+    .route("/fumos", get(list)) 
+    .route("/fumos/count", get(all_fumo_count))
+    .route("/fumos/{fumo}/count", get(fumo_count))
+}
+
 //Test function. The DB never should return everything unpaginated 
 async fn list_all(
     State(state): State<AppState> 
@@ -70,13 +80,6 @@ async fn list_all(
     }
 }
 
-fn fumo() -> Router<AppState> {
-
-    //todo!("All the reading stuff")
-    Router::new()
-    .route("/fumos/list_all",get(list_all))
-    .route("/fumos", get(list)) 
-}
 
 #[allow(dead_code)]
 #[derive(Deserialize)]
@@ -102,6 +105,34 @@ async fn list(Query(pagination): Query<Pagination>,State(state): State<AppState>
     }
 }
 
+async fn fumo_count(Path(fumo): Path<String>, State(state): State<AppState>) -> impl IntoResponse {
+    let Ok( mut conn)= state.db.get() else {
+      return Err(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+
+    let count = fumo_db::operations::fumo_count_by(&mut conn, fumo);
+
+    match count {
+        Ok(c) => Ok(Json(c)),
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR)
+    }
+
+}
+
+async fn all_fumo_count(State(state): State<AppState>) -> impl IntoResponse {
+
+    let Ok( mut conn)= state.db.get() else {
+      return Err(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+
+    let count = fumo_db::operations::fumo_count(&mut conn);
+
+    match count {
+        Ok(c) => Ok(Json(c)),
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR)
+    }
+
+}
 
 async fn root() -> &'static str {
     "Welcome to the fumo-API. Learn more at https://github.com/nosesisaid/fumo-api"

@@ -26,5 +26,8 @@ pub struct Fumo {
     pub submitter: String
 }
 
+pub fn is_valid_fumo(fumo: &String) ->bool {
+    INVOLVABLE.contains(&fumo.as_str())
+}
 
 pub static INVOLVABLE: &[&str] = &["Cirno", "Reimu", "Remilia"];

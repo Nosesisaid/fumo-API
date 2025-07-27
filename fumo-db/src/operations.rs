@@ -1,10 +1,13 @@
 
 
 
+use core::error;
+
 use diesel::associations::HasTable;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use diesel::dsl::*;
+use crate::models::is_valid_fumo;
 use crate::models::NewFumo;
 use crate::models::INVOLVABLE;
 use crate::schema::fumos::dsl::*;
@@ -16,6 +19,18 @@ pub fn fumo_count(conn: &mut PgConnection)  -> QueryResult<u64> {
     let c: i64= fumos.select(count(id)).first(conn)?;
     
     Ok(c as u64 )
+}
+
+pub fn fumo_count_by(conn: &mut PgConnection, fumo: String) -> QueryResult<u64> {
+    if !is_valid_fumo(&fumo){
+        return Err(diesel::result::Error::DeserializationError("Invalid fumo provided".into()))
+    };
+
+    let count: Result<i64, diesel::result::Error>= fumos.select(count(id)).filter(involved.contains(vec![&fumo])).first(conn);
+    match count {
+        Ok(c) => Ok(c as u64),
+        Err(e) => Err(e)
+    }
 }
 
 pub fn fetch_fumos(conn: &mut PgConnection, offset : i64, limit: Option<i64> ) -> QueryResult<Vec<Fumo>> {
