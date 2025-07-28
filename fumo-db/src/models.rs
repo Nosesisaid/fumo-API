@@ -1,17 +1,30 @@
 use diesel::{prelude::*, serialize};
+use serde::Deserialize;
 
 use crate::schema;
 
 
-#[derive(Insertable)]
+
+// #[derive(Insertable, Deserialize)]
+// #[diesel(table_name = schema::fumos)]
+// pub struct NewFumo<'a> {
+//     pub caption: &'a str,
+//     pub img: &'a str,
+//     pub public: bool,
+//     pub attribution: Option<&'a str>,
+//     pub submitter: Option<&'a str>,
+//     pub involved: Option<Vec<Option<&'a str>>>,
+// }
+
+#[derive(Insertable, Deserialize)]
 #[diesel(table_name = schema::fumos)]
-pub struct NewFumo<'a> {
-    pub caption: &'a str,
-    pub img: &'a str,
+pub struct NewFumo {
+    pub caption: String,
+    pub img: String,
     pub public: bool,
-    pub attribution: Option<&'a str>,
-    pub submitter: Option<&'a str>,
-    pub involved: Option<&'a [Option<String>]>
+    pub attribution: Option<String>,
+    pub submitter: Option<String>,
+    pub involved: Option<Vec<Option<String>>>
 }
 
 #[derive(Queryable,Selectable, serde::Serialize)]
@@ -26,7 +39,7 @@ pub struct Fumo {
     pub submitter: String
 }
 
-pub fn is_valid_fumo(fumo: &String) ->bool {
+pub fn is_valid_involvable(fumo: &String) ->bool {
     INVOLVABLE.contains(&fumo.as_str())
 }
 
