@@ -1,18 +1,7 @@
-use diesel::{prelude::*, serialize};
+use diesel::{prelude::*};
 use serde::Deserialize;
 
 use crate::schema;
-
-// #[derive(Insertable, Deserialize)]
-// #[diesel(table_name = schema::fumos)]
-// pub struct NewFumo<'a> {
-//     pub caption: &'a str,
-//     pub img: &'a str,
-//     pub public: bool,
-//     pub attribution: Option<&'a str>,
-//     pub submitter: Option<&'a str>,
-//     pub involved: Option<Vec<Option<&'a str>>>,
-// }
 
 #[derive(Insertable, Deserialize)]
 #[diesel(table_name = schema::fumos)]
