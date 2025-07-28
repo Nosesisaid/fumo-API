@@ -1,7 +1,11 @@
 use std::{env, net::SocketAddr};
 
 use axum::{
-    debug_handler, extract::{Path, Query, Request, State}, http::{header, StatusCode}, response::{IntoResponse, Json}, routing::{get, patch, post}, Router
+    Router, debug_handler,
+    extract::{Path, Query, Request, State},
+    http::{StatusCode, header},
+    response::{IntoResponse, Json},
+    routing::{get, patch, post},
 };
 use axum_extra::TypedHeader;
 use dotenvy::dotenv;
@@ -56,8 +60,8 @@ async fn main() {
 
 fn admin() -> Router<AppState> {
     Router::new()
-    .route("/admin/fumos/new", post(add_fumo))
-    .route("/admin/fumo/{fumo}/involved", patch(update_involved_fumos))
+        .route("/admin/fumos/new", post(add_fumo))
+        .route("/admin/fumo/{fumo}/involved", patch(update_involved_fumos))
 }
 
 async fn add_fumo(
@@ -95,18 +99,15 @@ async fn update_involved_fumos(
     };
 
     let Ok(fumo) = fumo.parse() else {
-        return Err(StatusCode::BAD_REQUEST)
+        return Err(StatusCode::BAD_REQUEST);
     };
 
     let res = fumo_db::operations::edit_involved(&mut conn, fumo, payload);
 
     match res {
         Ok(f) => Ok(Json(f)),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR)
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
     }
-
-
-
 }
 fn fumo() -> Router<AppState> {
     //todo!("All the reading stuff")

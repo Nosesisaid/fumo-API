@@ -3,8 +3,6 @@ use serde::Deserialize;
 
 use crate::schema;
 
-
-
 // #[derive(Insertable, Deserialize)]
 // #[diesel(table_name = schema::fumos)]
 // pub struct NewFumo<'a> {
@@ -24,10 +22,10 @@ pub struct NewFumo {
     pub public: bool,
     pub attribution: Option<String>,
     pub submitter: Option<String>,
-    pub involved: Option<Vec<Option<String>>>
+    pub involved: Option<Vec<Option<String>>>,
 }
 
-#[derive(Queryable,Selectable, serde::Serialize)]
+#[derive(Queryable, Selectable, serde::Serialize)]
 #[diesel(table_name = schema::fumos)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Fumo {
@@ -36,10 +34,10 @@ pub struct Fumo {
     pub img: String,
     pub involved: Option<Vec<Option<String>>>,
     pub attribution: Option<String>,
-    pub submitter: String
+    pub submitter: String,
 }
 
-pub fn is_valid_involvable(fumo: &String) ->bool {
+pub fn is_valid_involvable(fumo: &String) -> bool {
     INVOLVABLE.contains(&fumo.as_str())
 }
 

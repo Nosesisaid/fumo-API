@@ -1,7 +1,6 @@
-use diesel::{prelude::*};
+use diesel::prelude::*;
 use dotenvy::dotenv;
 use std::env;
-
 
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
@@ -11,22 +10,19 @@ pub fn establish_connection() -> PgConnection {
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 
-
-pub mod schema;
 pub mod models;
 pub mod operations;
+pub mod schema;
 
-use diesel::{r2d2::ConnectionManager, PgConnection};
+use diesel::{PgConnection, r2d2::ConnectionManager};
 
 pub type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub fn create_pool(database_url: String) -> DbPool {
-    
     let manager = ConnectionManager::<PgConnection>::new(&database_url);
 
-
     r2d2::Pool::builder()
-    .max_size(5)
-    .build(manager)
-    .expect("Failed to create the connection pool")
+        .max_size(5)
+        .build(manager)
+        .expect("Failed to create the connection pool")
 }
