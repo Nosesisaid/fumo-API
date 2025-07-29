@@ -6,4 +6,4 @@ file = "src/schema.rs"
 custom_type_derives = ["diesel::query_builder::QueryId", "Clone"]
 
 [migrations_directory]
-dir = "C:\\Users\\vic\\Documents\\GitHub\\fumo-API\\fumo-db\\migrations"
+dir = "migrations"
