@@ -1,10 +1,13 @@
 use fumo_db::{DbPool};
 use poise::{serenity_prelude::{self as serenity, ChannelId, GuildId}, ReplyHandle};
 #[path ="commands/admin_server.rs"] mod admin_server;
-
+pub mod event_handler;
 
 pub struct Data {
-    db: DbPool
+    db: DbPool,
+    admin_server_id: GuildId ,
+    administration_channel_id: ChannelId
+
 }
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub type Context<'a> = poise::Context<'a, Data, Error>;
@@ -57,17 +60,20 @@ async fn main() {
     let database_url = std::env::var("FB_DATABASE_URL").expect("FB_DATABASE_URL not provided");
 
     let admin_server_id: GuildId = std::env::var("FB_ADMIN_SERVER_ID").expect("FB_ADMIN_SERVER_ID not provided").parse().expect("Error parsing FB_ADMIN_SERVER_ID into a server id");
-    let administraction_channel: ChannelId = std::env::var("FB_ADMINISTRATION_CHANNEL_ID").expect("FB_ADMINISTRATION_CHANNEL_ID not provided").parse().expect("Error parsing FB_ADMINISTRATION_CHANNEL_ID into a channel id");
+    let administration_channel_id: ChannelId = std::env::var("FB_ADMINISTRATION_CHANNEL_ID").expect("FB_ADMINISTRATION_CHANNEL_ID not provided").parse().expect("Error parsing FB_ADMINISTRATION_CHANNEL_ID into a channel id");
 
 
     let global_commands = vec![ping()];
     let admin_server_commands = vec![admin_server::fumo(),admin_server::new()];
 
-    let intents = serenity::GatewayIntents::non_privileged();
+    let intents = serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![ping(),admin_server::fumo(),admin_server::new()],
+            event_handler: |ctx, event, framework, data| {
+                Box::pin(event_handler::event_handler(ctx, event, framework, data))
+            },
             pre_command: |ctx| {
             Box::pin(async move {
                 println!("Executing command {}...", ctx.command().qualified_name);
@@ -87,7 +93,9 @@ async fn main() {
                 println!("Succesfully registered {:?} as commands for {}", &admin_server_commands.iter().map(|c|&c.name).collect::<Vec<&String>>(), &admin_server_id);
 
                 Ok(Data {
-                    db: pool
+                    db: pool,
+                    admin_server_id,
+                    administration_channel_id
                 })
             })
         })
