@@ -1,13 +1,33 @@
 use fumo_db::{DbPool};
-use poise::serenity_prelude::{self as serenity, ChannelId, GuildId};
-mod admin_server;
+use poise::{serenity_prelude::{self as serenity, ChannelId, GuildId}, ReplyHandle};
+#[path ="commands/admin_server.rs"] mod admin_server;
 
 
-struct Data {
+pub struct Data {
     db: DbPool
 }
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub type Context<'a> = poise::Context<'a, Data, Error>;
+
+
+// pub trait SayEphemeral<'a> {
+//     fn say_ephemeral(self, text: impl Into<String>) -> Result<ReplyHandle<'a>, serenity::Error>;
+// }
+
+// impl<'a> SayEphemeral<'a> for Context <'a>{
+//     async fn say_ephemeral(
+//         self,
+//         text: impl Into<String>,
+//     ) -> Result<ReplyHandle<'a>, serenity::Error> {
+//         poise::say_reply(self, text).await
+//     }
+// }
+// NO MORE TRAITS I hate rust, why did i think implementing my on trait was a good idea
+
+pub async fn say_ephemeral<'a>(ctx: Context<'a>, text: impl Into<String>) ->Result<ReplyHandle<'a>, serenity::Error>
+{
+    poise::send_reply(ctx, poise::CreateReply::default().reply(true).ephemeral(true).content(text)).await
+}
 
 #[poise::command(slash_command, prefix_command)]
 async fn ping(
