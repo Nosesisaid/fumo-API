@@ -6,7 +6,8 @@ pub mod event_handler;
 pub struct Data {
     db: DbPool,
     admin_server_id: GuildId ,
-    administration_channel_id: ChannelId
+    administration_channel_id: ChannelId,
+    submissions_channel_id: ChannelId,
 
 }
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -61,6 +62,7 @@ async fn main() {
 
     let admin_server_id: GuildId = std::env::var("FB_ADMIN_SERVER_ID").expect("FB_ADMIN_SERVER_ID not provided").parse().expect("Error parsing FB_ADMIN_SERVER_ID into a server id");
     let administration_channel_id: ChannelId = std::env::var("FB_ADMINISTRATION_CHANNEL_ID").expect("FB_ADMINISTRATION_CHANNEL_ID not provided").parse().expect("Error parsing FB_ADMINISTRATION_CHANNEL_ID into a channel id");
+    let submissions_channel_id: ChannelId = std::env::var("FB_SUBMISSIONS_CHANNEL_ID").expect("FB_SUBMISSIONS_CHANNEL_ID not provided").parse().expect("Error parsing FB_SUBMISSIONS_CHANNEL_ID into a channel id");
 
 
     let global_commands = vec![ping()];
@@ -95,7 +97,8 @@ async fn main() {
                 Ok(Data {
                     db: pool,
                     admin_server_id,
-                    administration_channel_id
+                    administration_channel_id,
+                    submissions_channel_id
                 })
             })
         })
