@@ -1,4 +1,4 @@
-use diesel::{prelude::*};
+use diesel::prelude::*;
 use serde::Deserialize;
 
 use crate::schema;

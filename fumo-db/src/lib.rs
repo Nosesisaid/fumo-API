@@ -24,5 +24,10 @@ pub fn create_pool(database_url: String) -> DbPool {
     r2d2::Pool::builder()
         .max_size(5)
         .build(manager)
-        .unwrap_or_else(|e|panic!("{e}Failed to create the connection pool for {}", database_url))
+        .unwrap_or_else(|e| {
+            panic!(
+                "{e}Failed to create the connection pool for {}",
+                database_url
+            )
+        })
 }
