@@ -1,11 +1,17 @@
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-
-use crate::{util::InvolvableChoice, Data, Error};
-use poise::serenity_prelude::{
-    self as serenity, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedAuthor,
-    CreateEmbedFooter, CreateInputText, CreateMessage, CreateQuickModal, CreateSelectMenu,
-    CreateSelectMenuOption, EditMessage, MessageBuilder,
+use std::{
+    time::{Duration, SystemTime, UNIX_EPOCH},
+    vec,
 };
+
+use crate::{Data, Error, util::InvolvableChoice};
+use poise::serenity_prelude::{
+    self as serenity, ComponentInteractionDataKind, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter, CreateInputText, CreateMessage, CreateQuickModal, CreateSelectMenu, CreateSelectMenuOption, EditMessage, MessageBuilder
+};
+use strum::IntoEnumIterator;
+
+
+const INTERACTION_COLLECTOR_TIMEOUT: u64 = 120;
+
 
 pub async fn handler(
     ctx: &serenity::Context,
@@ -69,13 +75,16 @@ pub async fn handler(
             return Ok(());
         };
 
+
+        let involvable_choice_valid_iter = InvolvableChoice::iter().map(|f| CreateSelectMenuOption::new(f.to_string(),f.to_string()));
+        let mut select_menu_options = vec![CreateSelectMenuOption::new("None", "none").emoji('🛑').description("N/A")];
+        select_menu_options.extend(involvable_choice_valid_iter);
+
+        let menu_id = format!("submit-men-{}", new_message.id);
         let button_id = format!("submit-{}", new_message.id);
-        let mut embed_subm_message = thread
-            .send_message(
-                ctx,
-                CreateMessage::new()
-                    .add_embed(
-                        CreateEmbed::new()
+        
+        
+        let mut submission_embed = CreateEmbed::new()
                             .title(format!("Submission `#{}`", &new_message.id))
                             .author(CreateEmbedAuthor::new(format!(
                                 "Submitter 'dsc-{}'",
@@ -83,7 +92,14 @@ pub async fn handler(
                             )))
                             .description("Click on the submit button to fill all the neccesary data for your submission.")
                             .footer(CreateEmbedFooter::new("Do not delete the submission message. Your submission will be discarded automatically"))
-                            .color(serenity::Colour::PURPLE),
+                            .color(serenity::Colour::PURPLE);
+        
+        let mut embed_subm_message = thread
+            .send_message(
+                ctx,
+                CreateMessage::new()
+                    .add_embed(
+                        submission_embed,
                     )
                     .button(
                         CreateButton::new(&button_id)
@@ -91,9 +107,9 @@ pub async fn handler(
                             .style(serenity::ButtonStyle::Primary),
                     )
                     .select_menu(
-                        CreateSelectMenu::new(" ", serenity::CreateSelectMenuKind::String {
-                             options: InvolvableChoice:: 
-                            })
+                        CreateSelectMenu::new(&menu_id, serenity::CreateSelectMenuKind::String {
+                             options: select_menu_options, 
+                            }).max_values(10)
                     )
                     
                     ,
@@ -101,10 +117,26 @@ pub async fn handler(
             .await?;
 
         let mut succesfully_submitted = false;
-        let collector = serenity::ComponentInteractionCollector::new(&ctx.shard)
-            .timeout(Duration::from_secs(120))
+
+
+
+
+        let menu_collector = serenity::ComponentInteractionCollector::new(&ctx.shard)
+        .timeout(Duration::from_secs(INTERACTION_COLLECTOR_TIMEOUT))
+        .filter(move |mci| mci.data.custom_id == menu_id);
+
+        // while let Some(mci) = menu_collector.await {
+        //     println!("Menu interaction in submission");
+
+        //     if let ComponentInteractionDataKind::StringSelect { values } = &mci.data.kind {
+                
+        //     }
+        // }
+
+        let button_collector = serenity::ComponentInteractionCollector::new(&ctx.shard)
+            .timeout(Duration::from_secs(INTERACTION_COLLECTOR_TIMEOUT))
             .filter(move |mci| mci.data.custom_id == button_id);
-        while let Some(mci) = collector.await {
+        while let Some(mci) = button_collector.await {
             println!("Submission button press detected. Showing modal.");
             let modal = CreateQuickModal::new("Finish your submission")
                 .field(
@@ -120,7 +152,7 @@ pub async fn handler(
                         ))
                         .required(false),
                 )
-                .timeout(Duration::from_secs(120));
+                .timeout(Duration::from_secs(INTERACTION_COLLECTOR_TIMEOUT));
             let res = mci.quick_modal(ctx, modal).await?;
             let res = res.ok_or("Error getting the modal response")?;
 

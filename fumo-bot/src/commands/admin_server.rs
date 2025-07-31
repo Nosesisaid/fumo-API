@@ -3,7 +3,7 @@ use std::{
     vec,
 };
 
-use crate::{say_ephemeral, util::InvolvableChoice, Context, Error};
+use crate::{Context, Error, say_ephemeral, util::InvolvableChoice};
 
 use fumo_db::models::NewFumo;
 use poise::{
