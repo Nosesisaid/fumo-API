@@ -4,14 +4,16 @@ use std::{
 };
 
 use crate::{Data, Error, util::InvolvableChoice};
+use fumo_db::models::NewFumo;
 use poise::serenity_prelude::{
-    self as serenity, ComponentInteractionDataKind, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter, CreateInputText, CreateMessage, CreateQuickModal, CreateSelectMenu, CreateSelectMenuOption, EditMessage, MessageBuilder
+    self as serenity, ComponentInteractionDataKind, CreateActionRow, CreateButton, CreateEmbed,
+    CreateEmbedAuthor, CreateEmbedFooter, CreateInputText, CreateInteractionResponseFollowup,
+    CreateMessage, CreateQuickModal, CreateSelectMenu, CreateSelectMenuOption,
+    EditInteractionResponse, EditMessage, MessageBuilder,
 };
 use strum::IntoEnumIterator;
 
-
 const INTERACTION_COLLECTOR_TIMEOUT: u64 = 120;
-
 
 pub async fn handler(
     ctx: &serenity::Context,
@@ -30,6 +32,7 @@ pub async fn handler(
     }
     if new_message.channel_id == data.submissions_channel_id {
         println!("Message recived in the submissions channel");
+
         let attachment = new_message.attachments.first();
         if attachment.is_none() {
             const SECONDS_TO_WAIT_BEFORE_DELETING: u64 = 10;
@@ -50,6 +53,8 @@ pub async fn handler(
         }
         let attachment = attachment.unwrap();
 
+        //Wait one second bcuz rust is so blazingly fast responding before bugs out the discord client
+        tokio::time::sleep(Duration::from_secs(1)).await;
         let thread = new_message
             .channel_id
             .create_thread_from_message(
@@ -75,15 +80,20 @@ pub async fn handler(
             return Ok(());
         };
 
-
-        let involvable_choice_valid_iter = InvolvableChoice::iter().map(|f| CreateSelectMenuOption::new(f.to_string(),f.to_string()));
-        let mut select_menu_options = vec![CreateSelectMenuOption::new("None", "none").emoji('🛑').description("N/A")];
+        let involvable_choice_valid_iter = InvolvableChoice::iter()
+            .map(|f| CreateSelectMenuOption::new(f.to_string(), f.to_string()));
+        let mut select_menu_options = vec![
+            CreateSelectMenuOption::new("None", "none")
+                .emoji('🛑')
+                .description("N/A"),
+        ];
         select_menu_options.extend(involvable_choice_valid_iter);
+        let select_menu_len = select_menu_options.len().try_into().unwrap();
 
+        dbg!(&select_menu_options);
         let menu_id = format!("submit-men-{}", new_message.id);
         let button_id = format!("submit-{}", new_message.id);
-        
-        
+
         let mut submission_embed = CreateEmbed::new()
                             .title(format!("Submission `#{}`", &new_message.id))
                             .author(CreateEmbedAuthor::new(format!(
@@ -93,50 +103,83 @@ pub async fn handler(
                             .description("Click on the submit button to fill all the neccesary data for your submission.")
                             .footer(CreateEmbedFooter::new("Do not delete the submission message. Your submission will be discarded automatically"))
                             .color(serenity::Colour::PURPLE);
-        
+
         let mut embed_subm_message = thread
             .send_message(
                 ctx,
                 CreateMessage::new()
-                    .add_embed(
-                        submission_embed,
-                    )
+                    .add_embed(submission_embed.clone())
                     .button(
                         CreateButton::new(&button_id)
                             .label("Submit")
-                            .style(serenity::ButtonStyle::Primary),
+                            .style(serenity::ButtonStyle::Primary)
+                            .disabled(true),
                     )
                     .select_menu(
-                        CreateSelectMenu::new(&menu_id, serenity::CreateSelectMenuKind::String {
-                             options: select_menu_options, 
-                            }).max_values(10)
-                    )
-                    
-                    ,
+                        CreateSelectMenu::new(
+                            &menu_id,
+                            serenity::CreateSelectMenuKind::String {
+                                options: select_menu_options,
+                            },
+                        )
+                        .max_values(select_menu_len),
+                    ),
             )
             .await?;
 
-        let mut succesfully_submitted = false;
+        let mut successfully_submitted = false;
 
+        let mut insertable = NewFumo {
+            attribution: Some("".into()),
+            caption: "".into(),
+            img: attachment.proxy_url.clone(),
+            involved: None,
+            public: false,
+            submitter: Some(format!("dsc-{}", new_message.author.id)),
+        };
 
+        let menu_collector = embed_subm_message
+            .await_component_interaction(&ctx.shard)
+            .timeout(Duration::from_secs(INTERACTION_COLLECTOR_TIMEOUT))
+            .filter(move |mci| mci.data.custom_id == menu_id.clone());
 
+        let mut selected_involved: Option<Vec<String>> = None;
+        if let Some(mci) = menu_collector.await {
+            println!("Menu interaction in submission");
 
-        let menu_collector = serenity::ComponentInteractionCollector::new(&ctx.shard)
-        .timeout(Duration::from_secs(INTERACTION_COLLECTOR_TIMEOUT))
-        .filter(move |mci| mci.data.custom_id == menu_id);
+            _ = mci
+                .create_response(ctx, serenity::CreateInteractionResponse::Acknowledge)
+                .await;
 
-        // while let Some(mci) = menu_collector.await {
-        //     println!("Menu interaction in submission");
+            if let ComponentInteractionDataKind::StringSelect { values } = &mci.data.kind {
+                submission_embed =
+                    submission_embed
+                        .clone()
+                        .field("Involved", values.join(" "), false);
 
-        //     if let ComponentInteractionDataKind::StringSelect { values } = &mci.data.kind {
-                
-        //     }
-        // }
+                selected_involved = Some(values.clone());
+                _ = embed_subm_message
+                    .edit(
+                        ctx,
+                        EditMessage::new().embed(submission_embed.clone()).button(
+                            CreateButton::new(&button_id)
+                                .label("Submit")
+                                .disabled(false)
+                                .style(serenity::ButtonStyle::Primary),
+                        ),
+                    )
+                    .await;
+                insertable.involved = Some(values.clone().iter().map(|i| Some(i.clone())).collect())
+            }
+        }
 
-        let button_collector = serenity::ComponentInteractionCollector::new(&ctx.shard)
+        dbg!(&selected_involved);
+
+        let button_collector = embed_subm_message
+            .await_component_interaction(&ctx.shard)
             .timeout(Duration::from_secs(INTERACTION_COLLECTOR_TIMEOUT))
             .filter(move |mci| mci.data.custom_id == button_id);
-        while let Some(mci) = button_collector.await {
+        if let Some(mci) = button_collector.next().await {
             println!("Submission button press detected. Showing modal.");
             let modal = CreateQuickModal::new("Finish your submission")
                 .field(
@@ -163,28 +206,68 @@ pub async fn handler(
             let inputs = res.inputs;
 
             let (provided_caption, provided_attribution) = (&inputs[0], &inputs[1]);
-            dbg!(provided_caption, provided_attribution);
+            let provided_attribution = if provided_attribution.is_empty() {
+                format!("Discord {} [{}]", mci.user.name, mci.user.id)
+            } else {
+                provided_attribution.clone()
+            };
+            dbg!(&provided_caption, &provided_attribution);
 
-            succesfully_submitted = true;
-            break;
+            insertable.attribution = Some(provided_attribution.clone());
+            insertable.caption = provided_caption.clone();
+
+            submission_embed = submission_embed
+                .clone()
+                .field("Caption", provided_caption, false)
+                .field("Attribution", provided_attribution, false);
+
+            embed_subm_message
+                .edit(
+                    ctx,
+                    EditMessage::new().embed(submission_embed).button(
+                        CreateButton::new("none")
+                            .style(serenity::ButtonStyle::Success)
+                            .disabled(true)
+                            .label("Sent"),
+                    ),
+                )
+                .await?;
+
+            res.interaction
+                .create_followup(
+                    ctx,
+                    CreateInteractionResponseFollowup::new().content("Trying to submit fumo..."),
+                )
+                .await?;
+
+            let mut conn = data.db.get()?;
+
+            let r = fumo_db::operations::add_fumo(&mut conn, insertable);
+            'set_success: {
+                match r {
+                Ok(_) =>{
+                    res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("Submission succesfully sent to review! Thanks for contributing to the Fumo-API.")).await?;
+                },
+                Err(_)=> {
+                    res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("**X X X X X** Error trynig to send the submission to review. Thanks for (trying to) contribute to the Fumo-API.")).await?;
+
+                    break 'set_success
+                }
+            };
+
+                successfully_submitted = true;
+            }
         }
 
-        let mut message_edition: EditMessage = EditMessage::new().button(
+        let message_edition: EditMessage = EditMessage::new().button(
             CreateButton::new("none")
                 .style(serenity::ButtonStyle::Danger)
                 .disabled(true)
                 .label("Timed out"),
         );
-        if succesfully_submitted {
-            message_edition = EditMessage::new().button(
-                CreateButton::new("none")
-                    .style(serenity::ButtonStyle::Success)
-                    .disabled(true)
-                    .label("Sent"),
-            );
+        if !successfully_submitted {
+            embed_subm_message.edit(ctx, message_edition).await?;
         }
-
-        embed_subm_message.edit(ctx, message_edition).await?;
     };
     Ok(())
 }
