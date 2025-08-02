@@ -6,7 +6,6 @@ use fumo_db::{
 use poise::serenity_prelude::{CacheHttp, CreateEmbed, CreateMessage, UserId};
 use poise::serenity_prelude::{CreateEmbedAuthor, Timestamp};
 use strum::{Display, EnumIter, EnumString, IntoStaticStr};
-use tokio::runtime::Runtime;
 
 //IMPORTANT to keep synced with fumo_db::INVOLVABLE. Haven't found a good way to automate this.
 #[derive(Debug, poise::ChoiceParameter, EnumIter, EnumString, IntoStaticStr, Display)]
@@ -29,7 +28,7 @@ impl From<InvolvableChoice> for String {
 
 pub fn insert_fumo(
     conn: &mut PgConnection,
-    to_insert: NewFumo,
+    mut to_insert: NewFumo,
     dispatch: bool,
     ctx: Option<impl CacheHttp>,
     data: Option<&Data>,
@@ -37,17 +36,27 @@ pub fn insert_fumo(
     if dispatch {
         let ctx = ctx.ok_or("If you are dispatching the insertion you must pass on the Context")?;
         let data = data.ok_or("If you are dispatching the insertion you must pass on the data")?;
-
         let administration_channel = data.administration_channel_id;
-
         let embed = build_embed_from_newfumo(&to_insert);
+        tokio::task::block_in_place(||  {
 
-        let msg = administration_channel.send_message(ctx, CreateMessage::new().add_embed(embed));
-
-        let rt = Runtime::new()?;
-        rt.block_on(async {
-            _ = msg.await;
+            tokio::runtime::Handle::current().block_on(async {
+            let m = administration_channel.send_message(ctx, CreateMessage::new().add_embed(embed)).await;
+            
+            match m {
+                Err(e) => println!("Error dispatching insert_fumo to the administration channel {}",e),
+                _ =>{}
+            }
+            
+            })
+            
         });
+    }
+
+
+    if to_insert.involved.iter().any(|i| i.as_deref() == Some("none")){
+        to_insert.involved = vec![];
+        
     }
 
     match add_fumo(conn, to_insert) {
@@ -61,15 +70,11 @@ fn build_embed_from_newfumo(new: &NewFumo) -> CreateEmbed {
 
     let involved_in_string = new
         .involved
-        .as_ref()
-        .map(|v| {
-            v.iter()
+            .iter()
                 .filter_map(|o| o.as_ref())
                 .cloned()
                 .collect::<Vec<String>>()
-                .join(", ")
-        })
-        .unwrap_or("None".into());
+                .join(", ");
 
     CreateEmbed::new()
         .title(format!("Submission `#{}`", submission_id))
@@ -81,7 +86,7 @@ fn build_embed_from_newfumo(new: &NewFumo) -> CreateEmbed {
         .field("Involved", format!("`{}`", involved_in_string), false)
         .field("Caption", &new.caption, true)
         .field("Attribution", &new.attribution, false)
-        .field("Proxy image url", format!("`{}`", &new.attribution), false)
+        .field("Proxy image url", format!("`{}`", &new.img), false)
         .timestamp(Timestamp::now())
 }
 

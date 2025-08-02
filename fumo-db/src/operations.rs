@@ -46,8 +46,7 @@ pub fn fetch_fumos(
 }
 
 pub fn add_fumo(conn: &mut PgConnection, fumo_to_add: NewFumo) -> QueryResult<Fumo> {
-    if fumo_to_add.involved.as_ref().is_some_and(|invlvd| {
-        invlvd
+    if fumo_to_add.involved
             .iter()
             .filter_map(|element| {
                 element.as_ref().and_then(|e| {
@@ -60,7 +59,7 @@ pub fn add_fumo(conn: &mut PgConnection, fumo_to_add: NewFumo) -> QueryResult<Fu
             })
             .count()
             > 0
-    }) {
+    {
         return Err(diesel::result::Error::DeserializationError(
             "Invalid involved array provided".into(),
         ));
@@ -93,7 +92,7 @@ pub fn edit_involved(
         new_involved_typed.push(Some(element));
     }
 
-    let new_involved_typed = Some(new_involved_typed);
+    let new_involved_typed = new_involved_typed;
     let result = update(fumos)
         .filter(id.eq(fumo_unique_id))
         .set(involved.eq(new_involved_typed))

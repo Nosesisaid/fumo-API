@@ -6,7 +6,7 @@ diesel::table! {
         caption -> Varchar,
         img -> Varchar,
         public -> Bool,
-        involved -> Nullable<Array<Nullable<Text>>>,
+        involved -> Array<Nullable<Text>>,
         attribution -> Text,
         submission_time -> Timestamp,
         #[max_length = 32]

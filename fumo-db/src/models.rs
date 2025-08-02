@@ -11,7 +11,7 @@ pub struct NewFumo {
     pub public: bool,
     pub attribution: String,
     pub submitter: String,
-    pub involved: Option<Vec<Option<String>>>,
+    pub involved: Vec<Option<String>>,
 }
 
 #[derive(Queryable, Selectable, serde::Serialize)]
@@ -21,7 +21,7 @@ pub struct Fumo {
     pub id: i64,
     pub caption: String,
     pub img: String,
-    pub involved: Option<Vec<Option<String>>>,
+    pub involved: Vec<Option<String>>,
     pub attribution: String,
     pub submitter: String, //Submitters have the following structure: "{platform} {submitter_id}-{submission_id}". platform is a three letter code. Only dsc atm.
 }

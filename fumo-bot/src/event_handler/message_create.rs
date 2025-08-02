@@ -136,7 +136,7 @@ pub async fn handler(
             attribution: "".into(),
             caption: "".into(),
             img: attachment.proxy_url.clone(),
-            involved: None,
+            involved: vec![],
             public: false,
             submitter: format!("dsc {}-{}", new_message.author.id, new_message.id),
         };
@@ -172,7 +172,7 @@ pub async fn handler(
                         ),
                     )
                     .await;
-                insertable.involved = Some(values.clone().iter().map(|i| Some(i.clone())).collect())
+                insertable.involved = values.clone().iter().map(|i| Some(i.clone())).collect()
             }
         }
 
@@ -251,8 +251,9 @@ pub async fn handler(
                     Ok(_) => {
                         res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("Submission succesfully sent to review! Thanks for contributing to the Fumo-API.")).await?;
                     }
-                    Err(_) => {
-                        res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("**X X X X X** Error trynig to send the submission to review. Thanks for (trying to) contribute to the Fumo-API.")).await?;
+                    Err(e) => {
+                        println!("Error inserting the fumo{}",e);
+                        res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("**X** Error trynig to send the submission to review. Thanks for (trying to) contribute to the Fumo-API.")).await?;
 
                         break 'set_success;
                     }

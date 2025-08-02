@@ -46,7 +46,7 @@ pub async fn new(
         caption: caption.unwrap_or_default(),
         public: false,
         submitter: format!("dsc {}-{}", ctx.author().id, ctx.id()),
-        involved: Some(invlvd),
+        involved: invlvd,
     };
     say_ephemeral(ctx, "Loading database and inserting the fumo into it").await?;
 
