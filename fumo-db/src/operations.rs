@@ -7,8 +7,9 @@ use crate::models::is_valid_involvable;
 use crate::schema::fumos::dsl::*;
 use diesel::associations::HasTable;
 use diesel::dsl::*;
-use diesel::pg::PgConnection;
+pub use diesel::pg::PgConnection;
 use diesel::prelude::*;
+pub use diesel::result::QueryResult;
 
 pub fn fumo_count(conn: &mut PgConnection) -> QueryResult<u64> {
     let c: i64 = fumos.select(count(id)).first(conn)?;

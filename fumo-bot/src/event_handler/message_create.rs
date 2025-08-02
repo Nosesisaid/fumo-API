@@ -97,8 +97,9 @@ pub async fn handler(
         let mut submission_embed = CreateEmbed::new()
                             .title(format!("Submission `#{}`", &new_message.id))
                             .author(CreateEmbedAuthor::new(format!(
-                                "Submitter 'dsc-{}'",
-                                &new_message.author.id
+                                "Submitter 'dsc {}-{}'",
+                                &new_message.author.id,
+                                &new_message.id
                             )))
                             .description("Click on the submit button to fill all the neccesary data for your submission.")
                             .footer(CreateEmbedFooter::new("Do not delete the submission message. Your submission will be discarded automatically"))

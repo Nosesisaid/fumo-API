@@ -3,7 +3,7 @@ use std::{
     vec,
 };
 
-use crate::{Context, Error, say_ephemeral, util::InvolvableChoice};
+use crate::{say_ephemeral, util::{insert_fumo, InvolvableChoice}, Context, Error};
 
 use fumo_db::models::NewFumo;
 use poise::{
@@ -48,8 +48,9 @@ pub async fn new(
         attribution: Some(attribution),
         caption: caption.unwrap_or_default(),
         public: false,
-        submitter: Some(format!("dsc {}", ctx.author().id)),
+        submitter: Some(format!("dsc {}-{}", ctx.author().id, ctx.id())),
         involved: Some(invlvd),
+        
     };
     say_ephemeral(ctx, "Loading database and inserting the fumo into it").await?;
 
@@ -58,7 +59,7 @@ pub async fn new(
         return Ok(());
     };
 
-    let res = fumo_db::operations::add_fumo(&mut conn, fumo_to_insert);
+    let res = insert_fumo(&mut conn, fumo_to_insert, true, Some(&ctx), Some(&ctx.data()));
 
     match res {
         Ok(_) => {
