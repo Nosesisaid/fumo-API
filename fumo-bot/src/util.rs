@@ -1,13 +1,12 @@
 use crate::{Data, Error};
 use fumo_db::{
     models::{Fumo, NewFumo},
-    operations::{PgConnection, QueryResult, add_fumo},
+    operations::{PgConnection, add_fumo},
 };
-use poise::serenity_prelude::{self as serenity, CreateEmbedAuthor, Timestamp};
-use poise::serenity_prelude::{CacheHttp, ChannelId, Context, CreateEmbed, CreateMessage, UserId};
-use tokio::runtime::Runtime;
-use std::fmt;
+use poise::serenity_prelude::{CacheHttp, CreateEmbed, CreateMessage, UserId};
+use poise::serenity_prelude::{CreateEmbedAuthor, Timestamp};
 use strum::{Display, EnumIter, EnumString, IntoStaticStr};
+use tokio::runtime::Runtime;
 
 //IMPORTANT to keep synced with fumo_db::INVOLVABLE. Haven't found a good way to automate this.
 #[derive(Debug, poise::ChoiceParameter, EnumIter, EnumString, IntoStaticStr, Display)]
@@ -43,15 +42,12 @@ pub fn insert_fumo(
 
         let embed = build_embed_from_newfumo(&to_insert);
 
-        let msg = administration_channel.send_message(ctx, CreateMessage::new()
-            .add_embed(embed)
-        );
+        let msg = administration_channel.send_message(ctx, CreateMessage::new().add_embed(embed));
 
         let rt = Runtime::new()?;
-        rt.block_on(async{ 
+        rt.block_on(async {
             _ = msg.await;
         });
-
     }
 
     match add_fumo(conn, to_insert) {
@@ -63,24 +59,29 @@ pub fn insert_fumo(
 fn build_embed_from_newfumo(new: &NewFumo) -> CreateEmbed {
     let (submitter_id, submission_id) = extract_submitter(&new.submitter);
 
-    let involved_in_string = new.involved.as_ref().map(|v|{
-        v.iter()
-            .filter_map(|o| o.as_ref())
-            .cloned()
-            .collect::<Vec<String>>()
-            .join(", ")  
-    })
-    .unwrap_or("None".into())
-    ;
+    let involved_in_string = new
+        .involved
+        .as_ref()
+        .map(|v| {
+            v.iter()
+                .filter_map(|o| o.as_ref())
+                .cloned()
+                .collect::<Vec<String>>()
+                .join(", ")
+        })
+        .unwrap_or("None".into());
 
-
-    CreateEmbed::new().title(format!("Submission `#{}`", submission_id)).image(&new.img)
-        
-        .author(CreateEmbedAuthor::new(format!("By <@{}> [{}]", &submitter_id, &submitter_id)))
-        .field("Involved",format!("`{}`",involved_in_string), false)
+    CreateEmbed::new()
+        .title(format!("Submission `#{}`", submission_id))
+        .image(&new.img)
+        .author(CreateEmbedAuthor::new(format!(
+            "By <@{}> [{}]",
+            &submitter_id, &submitter_id
+        )))
+        .field("Involved", format!("`{}`", involved_in_string), false)
         .field("Caption", &new.caption, true)
-        .field("Attribution",&new.attribution,false)
-        .field("Proxy image url", format!("`{}`",&new.attribution), false)
+        .field("Attribution", &new.attribution, false)
+        .field("Proxy image url", format!("`{}`", &new.attribution), false)
         .timestamp(Timestamp::now())
 }
 

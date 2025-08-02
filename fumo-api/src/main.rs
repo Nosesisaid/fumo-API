@@ -1,9 +1,9 @@
 use std::{env, net::SocketAddr};
 
 use axum::{
-    Router, debug_handler,
-    extract::{Path, Query, Request, State},
-    http::{StatusCode, header},
+    Router,
+    extract::{Path, Query, State},
+    http::StatusCode,
     response::{IntoResponse, Json},
     routing::{get, patch, post},
 };

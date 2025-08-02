@@ -3,13 +3,15 @@ use std::{
     vec,
 };
 
-use crate::{util::{insert_fumo, InvolvableChoice}, Data, Error};
+use crate::{
+    Data, Error,
+    util::{InvolvableChoice, insert_fumo},
+};
 use fumo_db::models::NewFumo;
 use poise::serenity_prelude::{
-    self as serenity, ComponentInteractionDataKind, CreateActionRow, CreateButton, CreateEmbed,
-    CreateEmbedAuthor, CreateEmbedFooter, CreateInputText, CreateInteractionResponseFollowup,
-    CreateMessage, CreateQuickModal, CreateSelectMenu, CreateSelectMenuOption,
-    EditInteractionResponse, EditMessage, MessageBuilder,
+    self as serenity, ComponentInteractionDataKind, CreateButton, CreateEmbed, CreateEmbedAuthor,
+    CreateEmbedFooter, CreateInputText, CreateInteractionResponseFollowup, CreateMessage,
+    CreateQuickModal, CreateSelectMenu, CreateSelectMenuOption, EditMessage,
 };
 use strum::IntoEnumIterator;
 

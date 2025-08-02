@@ -1,7 +1,4 @@
-use std::{
-    fmt::{self, write},
-    vec,
-};
+use std::vec;
 
 use crate::{
     Context, Error, say_ephemeral,
@@ -9,10 +6,7 @@ use crate::{
 };
 
 use fumo_db::models::NewFumo;
-use poise::{
-    CreateReply,
-    serenity_prelude::{self as serenity, ChannelId, GuildId, futures::future::ok},
-};
+use poise::serenity_prelude::{self as serenity};
 
 #[poise::command(slash_command, subcommands("new"), subcommand_required)]
 pub async fn fumo(_: Context<'_>) -> Result<(), Error> {

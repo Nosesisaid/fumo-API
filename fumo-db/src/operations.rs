@@ -1,5 +1,3 @@
-use core::error;
-
 use crate::models::Fumo;
 use crate::models::INVOLVABLE;
 use crate::models::NewFumo;
