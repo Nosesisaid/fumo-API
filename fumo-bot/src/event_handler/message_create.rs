@@ -3,7 +3,7 @@ use std::{
     vec,
 };
 
-use crate::{Data, Error, util::InvolvableChoice};
+use crate::{util::{insert_fumo, InvolvableChoice}, Data, Error};
 use fumo_db::models::NewFumo;
 use poise::serenity_prelude::{
     self as serenity, ComponentInteractionDataKind, CreateActionRow, CreateButton, CreateEmbed,
@@ -131,12 +131,12 @@ pub async fn handler(
         let mut successfully_submitted = false;
 
         let mut insertable = NewFumo {
-            attribution: Some("".into()),
+            attribution: "".into(),
             caption: "".into(),
             img: attachment.proxy_url.clone(),
             involved: None,
             public: false,
-            submitter: Some(format!("dsc-{}", new_message.author.id)),
+            submitter: format!("dsc {}-{}", new_message.author.id, new_message.id),
         };
 
         let menu_collector = embed_subm_message
@@ -214,7 +214,7 @@ pub async fn handler(
             };
             dbg!(&provided_caption, &provided_attribution);
 
-            insertable.attribution = Some(provided_attribution.clone());
+            insertable.attribution = provided_attribution.clone();
             insertable.caption = provided_caption.clone();
 
             submission_embed = submission_embed
@@ -243,18 +243,18 @@ pub async fn handler(
 
             let mut conn = data.db.get()?;
 
-            let r = fumo_db::operations::add_fumo(&mut conn, insertable);
+            let r = insert_fumo(&mut conn, insertable, true, Some(ctx), Some(data));
             'set_success: {
                 match r {
-                Ok(_) =>{
-                    res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("Submission succesfully sent to review! Thanks for contributing to the Fumo-API.")).await?;
-                },
-                Err(_)=> {
-                    res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("**X X X X X** Error trynig to send the submission to review. Thanks for (trying to) contribute to the Fumo-API.")).await?;
+                    Ok(_) => {
+                        res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("Submission succesfully sent to review! Thanks for contributing to the Fumo-API.")).await?;
+                    }
+                    Err(_) => {
+                        res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("**X X X X X** Error trynig to send the submission to review. Thanks for (trying to) contribute to the Fumo-API.")).await?;
 
-                    break 'set_success
-                }
-            };
+                        break 'set_success;
+                    }
+                };
 
                 successfully_submitted = true;
             }

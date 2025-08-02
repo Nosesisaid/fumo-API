@@ -5,7 +5,7 @@ CREATE TABLE fumos (
     img VARCHAR NOT NULL,
     public BOOLEAN NOT NULL DEFAULT FALSE,
     involved TEXT [],
-    attribution TEXT,
+    attribution TEXT NOT NULL,
     submission_time TIMESTAMP NOT NULL DEFAULT NOW(),
     submitter VARCHAR(32) NOT NULL
 );

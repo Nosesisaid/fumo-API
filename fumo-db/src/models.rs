@@ -9,8 +9,8 @@ pub struct NewFumo {
     pub caption: String,
     pub img: String,
     pub public: bool,
-    pub attribution: Option<String>,
-    pub submitter: Option<String>,
+    pub attribution: String,
+    pub submitter: String,
     pub involved: Option<Vec<Option<String>>>,
 }
 
@@ -22,8 +22,8 @@ pub struct Fumo {
     pub caption: String,
     pub img: String,
     pub involved: Option<Vec<Option<String>>>,
-    pub attribution: Option<String>,
-    pub submitter: String,
+    pub attribution: String,
+    pub submitter: String, //Submitters have the following structure: "{platform} {submitter_id}-{submission_id}". platform is a three letter code. Only dsc atm.
 }
 
 pub fn is_valid_involvable(fumo: &String) -> bool {

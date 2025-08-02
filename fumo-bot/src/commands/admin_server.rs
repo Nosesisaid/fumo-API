@@ -3,7 +3,10 @@ use std::{
     vec,
 };
 
-use crate::{say_ephemeral, util::{insert_fumo, InvolvableChoice}, Context, Error};
+use crate::{
+    Context, Error, say_ephemeral,
+    util::{InvolvableChoice, insert_fumo},
+};
 
 use fumo_db::models::NewFumo;
 use poise::{
@@ -45,12 +48,11 @@ pub async fn new(
     };
     let fumo_to_insert = NewFumo {
         img: image.proxy_url.into(), //TODO: ALL The image handling. Checkif if its an image and uploading it to r2
-        attribution: Some(attribution),
+        attribution: attribution,
         caption: caption.unwrap_or_default(),
         public: false,
-        submitter: Some(format!("dsc {}-{}", ctx.author().id, ctx.id())),
+        submitter: format!("dsc {}-{}", ctx.author().id, ctx.id()),
         involved: Some(invlvd),
-        
     };
     say_ephemeral(ctx, "Loading database and inserting the fumo into it").await?;
 
@@ -59,7 +61,13 @@ pub async fn new(
         return Ok(());
     };
 
-    let res = insert_fumo(&mut conn, fumo_to_insert, true, Some(&ctx), Some(&ctx.data()));
+    let res = insert_fumo(
+        &mut conn,
+        fumo_to_insert,
+        true,
+        Some(&ctx),
+        Some(&ctx.data()),
+    );
 
     match res {
         Ok(_) => {
