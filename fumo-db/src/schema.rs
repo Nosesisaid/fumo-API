@@ -9,7 +9,6 @@ diesel::table! {
         involved -> Array<Nullable<Text>>,
         attribution -> Text,
         submission_time -> Timestamp,
-        #[max_length = 32]
-        submitter -> Varchar,
+        submitter -> Text,
     }
 }

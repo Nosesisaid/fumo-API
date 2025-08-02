@@ -61,7 +61,7 @@ pub fn insert_fumo(
 
     match add_fumo(conn, to_insert) {
         Ok(f) => Ok(f),
-        Err(_) => Err("Error inserting the fumo".into()),
+        Err(e) => Err(e.into()),
     }
 }
 

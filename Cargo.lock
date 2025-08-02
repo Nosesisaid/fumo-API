@@ -597,6 +597,7 @@ dependencies = [
  "poise_macros",
  "strum",
  "tokio",
+ "tracing",
  "tracing-subscriber",
 ]
 

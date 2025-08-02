@@ -68,7 +68,8 @@ pub async fn new(
             say_ephemeral(ctx, "Fumo succesfully uploaded to the review queue").await?;
             Ok(())
         }
-        Err(_) => {
+        Err(e) => {
+            tracing::warn!{e, "Failed to insert fumo to the review queue"};
             say_ephemeral(ctx, "Error inserting the submission into the review queue.").await?;
             Ok(())
         }

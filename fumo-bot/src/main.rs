@@ -65,6 +65,7 @@ async fn ping(
 
 #[tokio::main]
 async fn main() {
+    
     tracing_subscriber::fmt::init();
 
     _ = dbg!(dotenvy::dotenv());

@@ -252,7 +252,7 @@ pub async fn handler(
                         res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("Submission succesfully sent to review! Thanks for contributing to the Fumo-API.")).await?;
                     }
                     Err(e) => {
-                        println!("Error inserting the fumo{}",e);
+            tracing::warn!{e, "Failed to insert the submission to the review queue"};
                         res.interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("**X** Error trynig to send the submission to review. Thanks for (trying to) contribute to the Fumo-API.")).await?;
 
                         break 'set_success;

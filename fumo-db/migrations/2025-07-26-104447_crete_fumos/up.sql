@@ -7,5 +7,5 @@ CREATE TABLE fumos (
     involved TEXT [] NOT NULL,
     attribution TEXT NOT NULL,
     submission_time TIMESTAMP NOT NULL DEFAULT NOW(),
-    submitter VARCHAR(32) NOT NULL
+    submitter TEXT NOT NULL
 );
