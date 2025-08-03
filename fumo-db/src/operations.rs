@@ -1,4 +1,5 @@
 use crate::models::APIFumo;
+use crate::models::ApproveUpdateFumo;
 use crate::models::Fumo;
 use crate::models::NewFumo;
 use crate::models::is_valid_involvable;
@@ -134,4 +135,48 @@ pub fn get_random(
     } 
 
     query.first(conn)
+}
+
+
+pub fn approve_entry(
+    conn: &mut PgConnection,
+    identificator: i64,
+    new_img_url: Option<String>
+) -> QueryResult<Fumo>{
+
+    let changeset = ApproveUpdateFumo {
+        public: Some(true),
+        img: new_img_url
+    };
+    diesel::update(fumos.filter(id.eq(identificator)))
+    .set(&changeset)
+    .returning(Fumo::as_returning())
+    .get_result(conn)
+
+
+}
+
+pub fn delete_entry(
+    conn: &mut PgConnection,
+    identificator: i64
+)-> QueryResult<bool>{
+
+
+    let deleted_count = diesel::delete(fumos.filter(id.eq(identificator))).execute(conn)?;
+    
+    if deleted_count == 0 {
+        Ok(false)
+    } else if deleted_count == 1 {
+        Ok(true)
+    } else {
+        Err(diesel::result::Error::QueryBuilderError("More than one entry deleted, weird".into()))
+    }
+}
+
+
+pub fn get_fumo_byid(
+    conn: &mut PgConnection,
+    identificator: i64
+) -> QueryResult<Fumo> {
+    fumos.select(Fumo::as_select()).filter(id.eq(identificator)).first(conn)
 }

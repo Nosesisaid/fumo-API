@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::schema;
 
-#[derive(Insertable, Deserialize)]
+#[derive(Insertable, Deserialize, Clone)]
 #[diesel(table_name = schema::fumos)]
 pub struct NewFumo {
     pub caption: String,
@@ -36,8 +36,17 @@ pub static INVOLVABLE: &[&str] = &["Cirno", "Reimu", "Remilia"];
 #[derive(Debug, PartialEq, Queryable, Selectable, Serialize)]
 #[diesel(table_name = schema::fumos)]
 pub struct APIFumo {
+    pub id: i64,
     pub caption: String,
     pub img: String,
     pub attribution: String,
     pub involved: Vec<Option<String>>
+}
+
+
+#[derive(AsChangeset, Debug)]
+#[diesel(table_name = schema::fumos)]
+pub struct ApproveUpdateFumo {
+    pub public: Option<bool>,
+    pub img: Option<String>,
 }

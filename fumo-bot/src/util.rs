@@ -35,12 +35,26 @@ pub fn insert_fumo(
     ctx: Option<impl CacheHttp>,
     data: Option<&Data>,
 ) -> Result<Fumo, Error> {
+
+
+    if to_insert.involved.iter().any(|i| i.as_deref() == Some("none")){
+        to_insert.involved = vec![];
+        
+    }
+
+    let to_insert_for_embed = to_insert.clone();
+
+    let new_fumo = match add_fumo(conn, to_insert) {
+        Ok(f) => f,
+        Err(e) =>{ return Err(e.into())},
+    };
+
     if dispatch {
         let ctx = ctx.ok_or("If you are dispatching the insertion you must pass on the Context")?;
         let data = data.ok_or("If you are dispatching the insertion you must pass on the data")?;
         let administration_channel = data.administration_channel_id;
-        let embed = build_embed_from_newfumo(&to_insert);
-        let (submitter_id, submission_id) = extract_submitter(&to_insert.submitter);
+        let embed = build_embed_from_newfumo(&to_insert_for_embed);
+        let (submitter_id, submission_id) = extract_submitter(&to_insert_for_embed.submitter);
 
         tokio::task::block_in_place(||  {
 
@@ -59,7 +73,10 @@ pub fn insert_fumo(
                     submitter_id: submitter_id.into()
                 };
 
-                let msg = CreateMessage::new().add_embed(embed).components(
+                let msg = CreateMessage::new()
+                .content(new_fumo.id.to_string())
+                .add_embed(embed)
+                .components(
                     vec![
                         CreateActionRow::Buttons(vec![
                             CreateButton::new(accept_button_id).label("Accept").style(poise::serenity_prelude::ButtonStyle::Success),
@@ -78,16 +95,9 @@ pub fn insert_fumo(
         });
     }
 
+    Ok(new_fumo)
 
-    if to_insert.involved.iter().any(|i| i.as_deref() == Some("none")){
-        to_insert.involved = vec![];
-        
-    }
 
-    match add_fumo(conn, to_insert) {
-        Ok(f) => Ok(f),
-        Err(e) => Err(e.into()),
-    }
 }
 
 fn build_embed_from_newfumo(new: &NewFumo) -> CreateEmbed {
@@ -169,15 +179,15 @@ pub struct InteractionCustomID {
 }
 
 impl InteractionCustomID {
-    pub fn new(id: impl Into<String>) -> Self {
+    pub fn new(id: impl Into<String>) -> Result<Self, Error> {
 
         let id: String = id.into();
-        let id = id.split("-").into_iter().collect::<Vec<&str>>();
+        let id = dbg![id.split("-").into_iter().collect::<Vec<&str>>()];
 
-        let submission_id: u64 = id[0].parse().unwrap();
-        let submitter_id: u64 = id[1].parse().unwrap();
+        let submission_id: u64 = id[0].parse()?;
+        let submitter_id: u64 = id[1].parse()?;
         let action: InteractionAction = InteractionCustomID::interaction_action_from_short_str(id[2]).unwrap_or(InteractionAction::Unknown);
-        InteractionCustomID { submission_id, submitter_id, action }
+        Ok(InteractionCustomID { submission_id, submitter_id, action })
     }
 
     pub fn interaction_action_from_short_str(action: &str) -> Result<InteractionAction, strum::ParseError>{
@@ -196,3 +206,11 @@ impl From<InteractionCustomID> for String {
     }
 }
 
+
+
+
+pub fn upload_to_cdn(proxy_img_url: impl Into<String>)->String {
+    //TODO: Make it actually like upload to a cdn
+    proxy_img_url.into()
+
+}
