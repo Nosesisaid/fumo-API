@@ -32,7 +32,8 @@ export default {
 				}
 				const imageBuff = await fetch(body.image_proxy_url);
 				if (!imageBuff.ok || !imageBuff.body) {
-					return new Response("Failed to fetch imaged. Got status "+imageBuff.status,{status:502})
+					let text = await imageBuff.text()
+					return new Response("Failed to fetch imaged. Got status "+imageBuff.status+ text,{status:502});
 				}
 				await env.FUMOS_BUCKET.put(key, imageBuff.body );
 
