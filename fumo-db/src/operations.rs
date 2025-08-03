@@ -55,7 +55,7 @@ pub fn fetch_fumos(
     include_not_public: bool,
 ) -> QueryResult<Vec<APIFumo>> {
     let limit = limit.unwrap_or(15);
-    let mut query = fumos
+    let query = fumos
         .select(APIFumo::as_select())
         .limit(limit)
         .offset(offset);

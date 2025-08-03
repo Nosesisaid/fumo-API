@@ -1,11 +1,15 @@
-use axum::{extract::{Path, Query, State}, http::StatusCode, response::IntoResponse, Json, Router};
+use crate::{AppState, util};
+use axum::routing::method_routing::get;
+use axum::{
+    Json, Router,
+    extract::{Path, Query, State},
+    http::StatusCode,
+    response::IntoResponse,
+};
 use axum_extra::TypedHeader;
 use fumo_db::models::is_valid_involvable;
-use headers::{authorization::Bearer, Authorization};
+use headers::{Authorization, authorization::Bearer};
 use serde::Deserialize;
-use axum::routing::method_routing::get;
-use crate::{util, AppState};
-
 
 pub fn fumo() -> Router<AppState> {
     //todo!("All the reading stuff")
@@ -16,7 +20,6 @@ pub fn fumo() -> Router<AppState> {
         .route("/fumos", get(list))
         .route("/fumos/count", get(all_fumo_count))
         .route("/fumos/{fumo}/count", get(fumo_count))
-        
 }
 
 //Test function. The DB never should return everything unpaginated
@@ -31,7 +34,7 @@ async fn list_all(
         return Err(StatusCode::INTERNAL_SERVER_ERROR);
     };
 
-    let results = fumo_db::operations::fetch_fumos(&mut conn, 0, None,false);
+    let results = fumo_db::operations::fetch_fumos(&mut conn, 0, None, false);
     if let Ok(res) = results {
         Ok(Json(res))
     } else {
@@ -58,7 +61,8 @@ async fn list(
 
     let offset = (limit * page) - limit;
 
-    let results = fumo_db::operations::fetch_fumos(&mut conn, offset.into(), Some(limit.into()),false);
+    let results =
+        fumo_db::operations::fetch_fumos(&mut conn, offset.into(), Some(limit.into()), false);
 
     match results {
         Ok(r) => Ok(Json(r)),
@@ -84,7 +88,7 @@ async fn all_fumo_count(State(state): State<AppState>) -> impl IntoResponse {
         return Err(StatusCode::INTERNAL_SERVER_ERROR);
     };
 
-    let count = fumo_db::operations::fumo_count(&mut conn,false);
+    let count = fumo_db::operations::fumo_count(&mut conn, false);
 
     match count {
         Ok(c) => Ok(Json(c)),
@@ -92,30 +96,31 @@ async fn all_fumo_count(State(state): State<AppState>) -> impl IntoResponse {
     }
 }
 
-
-async fn random_specific_fumo(Path(fumo): Path<String>,State(state): State<AppState>) -> impl IntoResponse {
-        let Ok(mut conn) = state.db.get() else {
+async fn random_specific_fumo(
+    Path(fumo): Path<String>,
+    State(state): State<AppState>,
+) -> impl IntoResponse {
+    let Ok(mut conn) = state.db.get() else {
         return Err(StatusCode::INTERNAL_SERVER_ERROR);
     };
 
-    if !is_valid_involvable(&fumo){
+    if !is_valid_involvable(&fumo) {
         return Err(StatusCode::NOT_FOUND);
     }
 
-    match fumo_db::operations::get_random(&mut conn, Some(fumo), false){
+    match fumo_db::operations::get_random(&mut conn, Some(fumo), false) {
         Ok(c) => Ok(Json(c)),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR)
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
     }
 }
 
-
 async fn random_fumo(State(state): State<AppState>) -> impl IntoResponse {
-        let Ok(mut conn) = state.db.get() else {
+    let Ok(mut conn) = state.db.get() else {
         return Err(StatusCode::INTERNAL_SERVER_ERROR);
     };
 
-    match fumo_db::operations::get_random(&mut conn, None, false){
+    match fumo_db::operations::get_random(&mut conn, None, false) {
         Ok(c) => Ok(Json(c)),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR)
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
     }
 }

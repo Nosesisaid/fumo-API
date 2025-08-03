@@ -1,11 +1,14 @@
-
-use axum::{extract::{Path, Query, State}, http::StatusCode, response::IntoResponse, Json, Router};
+use crate::{AppState, util};
+use axum::routing::method_routing::{patch, post};
+use axum::{
+    Json, Router,
+    extract::{Path, State},
+    http::StatusCode,
+    response::IntoResponse,
+};
 use axum_extra::TypedHeader;
-use fumo_db::models::{is_valid_involvable, NewFumo};
-use headers::{authorization::Bearer, Authorization};
-use serde::Deserialize;
-use axum::routing::method_routing::{post,patch};
-use crate::{util, AppState};
+use fumo_db::models::NewFumo;
+use headers::{Authorization, authorization::Bearer};
 
 pub fn admin() -> Router<AppState> {
     Router::new()

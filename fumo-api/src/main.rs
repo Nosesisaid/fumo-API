@@ -1,23 +1,14 @@
 use std::{env, net::SocketAddr};
 
-use axum::{
-    Router,
-    extract::{Path, Query, State},
-    http::StatusCode,
-    response::{IntoResponse, Json},
-    routing::{get, patch, post},
-};
-use axum_extra::TypedHeader;
+use axum::{Router, routing::get};
 use dotenvy::dotenv;
-use fumo_db::{create_pool, models::{is_valid_involvable, NewFumo}, DbPool};
-use headers::{Authorization, authorization::Bearer};
-use serde::Deserialize;
+use fumo_db::{DbPool, create_pool};
 
 use crate::{admin_router::admin, fumos_router::fumo};
 
-mod util;
 mod admin_router;
 mod fumos_router;
+mod util;
 
 #[derive(Clone)]
 struct AppState {
@@ -61,7 +52,6 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
-
 
 async fn root() -> &'static str {
     "Welcome to the fumo-API. Learn more at https://github.com/nosesisaid/fumo-api"
