@@ -1,4 +1,4 @@
-use poise::serenity_prelude::{self as serenity, ChannelId, ComponentInteractionDataKind, CreateInteractionResponseFollowup, EditMessage, EditThread, InteractionType, Message, MessageId};
+use poise::serenity_prelude::{self as serenity, ChannelId, CreateInteractionResponseFollowup, EditMessage, EditThread, InteractionType};
 
 use crate::{util::{upload_to_cdn, InteractionCustomID}, Data, Error};
 
