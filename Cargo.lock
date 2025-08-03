@@ -586,22 +586,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fumo-API"
-version = "0.1.0"
-dependencies = [
- "axum",
- "axum-extra",
- "diesel",
- "dotenvy",
- "fumo-db",
- "headers",
- "serde",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "fumo-bot"
 version = "0.1.0"
 dependencies = [
@@ -626,6 +610,22 @@ dependencies = [
  "dotenvy",
  "r2d2",
  "serde",
+]
+
+[[package]]
+name = "fumo-rest-API"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "axum-extra",
+ "diesel",
+ "dotenvy",
+ "fumo-db",
+ "headers",
+ "serde",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
