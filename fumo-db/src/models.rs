@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::schema;
 
@@ -31,3 +31,13 @@ pub fn is_valid_involvable(fumo: &String) -> bool {
 }
 
 pub static INVOLVABLE: &[&str] = &["Cirno", "Reimu", "Remilia"];
+
+
+#[derive(Debug, PartialEq, Queryable, Selectable, Serialize)]
+#[diesel(table_name = schema::fumos)]
+pub struct APIFumo {
+    pub caption: String,
+    pub img: String,
+    pub attribution: String,
+    pub involved: Vec<Option<String>>
+}

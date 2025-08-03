@@ -1,5 +1,5 @@
+use crate::models::APIFumo;
 use crate::models::Fumo;
-use crate::models::INVOLVABLE;
 use crate::models::NewFumo;
 use crate::models::is_valid_involvable;
 use crate::schema::fumos::dsl::*;
@@ -8,25 +8,41 @@ use diesel::dsl::*;
 pub use diesel::pg::PgConnection;
 use diesel::prelude::*;
 pub use diesel::result::QueryResult;
+use diesel::sql_types::Integer;
 
-pub fn fumo_count(conn: &mut PgConnection) -> QueryResult<u64> {
-    let c: i64 = fumos.select(count(id)).first(conn)?;
+pub fn fumo_count(conn: &mut PgConnection, include_not_public: bool) -> QueryResult<u64> {
+    
+    let c = fumos.select(count(id));
+    if !include_not_public {
+        let a: i64 = c.filter(public.eq(true)).first(conn)?;
+        return Ok(a as u64)
+    }
 
-    Ok(c as u64)
+    let a: i64 = c.first(conn)?;
+    Ok( a as u64)
 }
 
-pub fn fumo_count_by(conn: &mut PgConnection, fumo: String) -> QueryResult<u64> {
+pub fn fumo_count_by(conn: &mut PgConnection, fumo: String, include_not_public: bool) -> QueryResult<u64> {
     if !is_valid_involvable(&fumo) {
         return Err(diesel::result::Error::DeserializationError(
             "Invalid fumo provided".into(),
         ));
     };
 
-    let count: Result<i64, diesel::result::Error> = fumos
+    let count= fumos
         .select(count(id))
-        .filter(involved.contains(vec![&fumo]))
-        .first(conn);
-    match count {
+        .filter(involved.contains(vec![&fumo]));
+
+        if !include_not_public {
+            return match count.first::<i64>(conn) {
+                Ok(c) => Ok(c as u64),
+                Err(e) => Err(e)
+            }
+        }
+
+        
+
+        match count.first::<i64>(conn) {
         Ok(c) => Ok(c as u64),
         Err(e) => Err(e),
     }
@@ -36,13 +52,20 @@ pub fn fetch_fumos(
     conn: &mut PgConnection,
     offset: i64,
     limit: Option<i64>,
-) -> QueryResult<Vec<Fumo>> {
+    include_not_public: bool,
+) -> QueryResult<Vec<APIFumo>> {
     let limit = limit.unwrap_or(15);
-    fumos
-        .select(Fumo::as_select())
+    let mut query = fumos
+        .select(APIFumo::as_select())
         .limit(limit)
-        .offset(offset)
-        .load(conn)
+        .offset(offset);
+
+        if !include_not_public {
+            return query.filter(public.eq(true)).load(conn)
+        }
+
+        query.load(conn)
+
 }
 
 pub fn add_fumo(conn: &mut PgConnection, fumo_to_add: NewFumo) -> QueryResult<Fumo> {
@@ -92,4 +115,23 @@ pub fn edit_involved(
         .get_result(conn);
 
     return result;
+}
+
+pub fn get_random(
+    conn: &mut PgConnection,
+    fumo: Option<String>,
+    include_not_public: bool
+) -> QueryResult<APIFumo>{
+
+    let mut query =    fumos.select(APIFumo::as_select()).order_by(sql::<Integer>("RANDOM()")).limit(1).into_boxed();
+
+    if  !include_not_public {
+        query = query.filter(public.eq(true));
+    }
+
+    if let Some(fumo) = fumo {
+        query = query.filter(involved.contains(vec![fumo]));
+    } 
+
+    query.first(conn)
 }
