@@ -1,9 +1,10 @@
 use std::vec;
 
 use crate::{
-    Context, Error, say_ephemeral,
+    Context, Error,
     util::{InvolvableChoice, insert_fumo},
 };
+use crate::util::say_ephemeral;
 
 use fumo_db::models::NewFumo;
 use poise::serenity_prelude::{self as serenity};

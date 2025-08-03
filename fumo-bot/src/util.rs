@@ -1,11 +1,11 @@
 use std::{str::FromStr, vec};
 
-use crate::{Data, Error};
+use crate::{Context, Data, Error};
 use fumo_db::{
     models::{Fumo, NewFumo},
     operations::{PgConnection, add_fumo},
 };
-use poise::serenity_prelude::{CacheHttp, CreateActionRow, CreateButton, CreateEmbed, CreateMessage, InteractionType, Request, Route, UserId};
+use poise::{serenity_prelude::{self as serenity,CacheHttp, CreateActionRow, CreateButton, CreateEmbed, CreateMessage, InteractionType, Request, Route, UserId}, ReplyHandle};
 use poise::serenity_prelude::{CreateEmbedAuthor, Timestamp};
 use reqwest::Url;
 use strum::{Display, EnumIter, EnumString, IntoStaticStr};
@@ -241,4 +241,18 @@ impl From<InteractionCustomID> for String {
     res.error_for_status()?;
 
     Ok(format!("{}/{}",data.r2_base_url,key))
+}
+
+pub async fn say_ephemeral<'a>(
+    ctx: Context<'a>,
+    text: impl Into<String>,
+) -> Result<ReplyHandle<'a>, serenity::Error> {
+    poise::send_reply(
+        ctx,
+        poise::CreateReply::default()
+            .reply(true)
+            .ephemeral(true)
+            .content(text),
+    )
+    .await
 }

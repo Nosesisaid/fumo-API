@@ -5,6 +5,8 @@ use poise::{
 };
 #[path = "commands/admin_server.rs"]
 mod admin_server;
+#[path ="commands/global.rs"]
+mod global;
 pub mod event_handler;
 pub mod util;
 pub struct Data {
@@ -20,38 +22,6 @@ pub struct Data {
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub type Context<'a> = poise::Context<'a, Data, Error>;
 
-pub async fn say_ephemeral<'a>(
-    ctx: Context<'a>,
-    text: impl Into<String>,
-) -> Result<ReplyHandle<'a>, serenity::Error> {
-    poise::send_reply(
-        ctx,
-        poise::CreateReply::default()
-            .reply(true)
-            .ephemeral(true)
-            .content(text),
-    )
-    .await
-}
-
-#[poise::command(slash_command, prefix_command)]
-async fn ping(
-    ctx: Context<'_>,
-    #[description = "Test option"] test: Option<String>,
-) -> Result<(), Error> {
-    let Ok(mut _conn) = ctx.data().db.get() else {
-        ctx.say("Error getting into the db").await?;
-        return Ok(());
-    };
-
-    let u = test.unwrap_or("".into());
-    let response = format!(
-        "Pong! Hi from serenity, I really {}, I'm connected to the db",
-        u
-    );
-    ctx.say(response).await?;
-    Ok(())
-}
 
 #[tokio::main]
 async fn main() {
@@ -88,7 +58,7 @@ async fn main() {
 
     let reqwest_client = reqwest::Client::new();
 
-    let global_commands = vec![ping()];
+    let global_commands = vec![global::ping()];
     let admin_server_commands = vec![admin_server::fumo(), admin_server::new()];
 
     let intents =
@@ -96,7 +66,7 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![ping(), admin_server::fumo(), admin_server::new()],
+            commands: vec![global::ping(), admin_server::fumo(), admin_server::new()],
             event_handler: |ctx, event, framework, data| {
                 Box::pin(event_handler::event_handler(ctx, event, framework, data))
             },
