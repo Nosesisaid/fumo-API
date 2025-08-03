@@ -45,7 +45,7 @@ async fn component_interaction_handler(
                 let entry_id: i64 = interaction.message.content.trim().parse()?;
 
                 
-                let new_image_url = upload_to_cdn(&submsission_message.attachments.first().ok_or("Attachment not found on submission message.")?.proxy_url);
+                let new_image_url = upload_to_cdn(&entry_id,&submsission_message.attachments.first().ok_or("Attachment not found on submission message.")?.proxy_url, &data).await?;
 
                 let followup = interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("Trying to approve entry...")).await?;
             

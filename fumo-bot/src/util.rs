@@ -7,7 +7,9 @@ use fumo_db::{
 };
 use poise::serenity_prelude::{CacheHttp, CreateActionRow, CreateButton, CreateEmbed, CreateMessage, InteractionType, Request, Route, UserId};
 use poise::serenity_prelude::{CreateEmbedAuthor, Timestamp};
+use reqwest::Url;
 use strum::{Display, EnumIter, EnumString, IntoStaticStr};
+use tracing_subscriber::fmt::format;
 
 //IMPORTANT to keep synced with fumo_db::INVOLVABLE. Haven't found a good way to automate this.
 #[derive(Debug, poise::ChoiceParameter, EnumIter, EnumString, IntoStaticStr, Display)]
@@ -209,10 +211,34 @@ impl From<InteractionCustomID> for String {
 
 
 
-pub fn upload_to_cdn(proxy_img_url: impl Into<String>)->String {
-    //TODO: Make it actually like upload to a cdn
+ pub async fn upload_to_cdn(identificator: &i64, proxy_img_url: impl Into<String>, data: &Data)->Result<String,Error> {
 
+    let proxy_img_url: String = proxy_img_url.into();
+    let mut parsed_img_url = Url::parse(&proxy_img_url)?;
     
-    proxy_img_url.into()
+    parsed_img_url.query_pairs_mut().append_pair("format", "png");
+    parsed_img_url.query_pairs_mut().append_pair("quality", "lossless");
 
+    let extension = ".png";
+    let key = dbg![format!("{identificator}{extension}")];
+
+    let put_url = format!("{}/{}",data.uploader_worker_base_url,key);
+    let client = data.reqwest_client.clone();
+
+    let img_req = client.get(parsed_img_url)
+    .send().await?.error_for_status()?;
+
+    let buff = img_req.bytes().await?;
+
+
+    let res = client
+    .put(put_url)
+    .header("X-Custom-Auth-Key", &data.worker_auth_key_secret)
+    .body(buff)
+    .send()
+    .await?;
+
+    res.error_for_status()?;
+
+    Ok(format!("{}/{}",data.r2_base_url,key))
 }

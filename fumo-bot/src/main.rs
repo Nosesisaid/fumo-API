@@ -12,6 +12,7 @@ pub struct Data {
     admin_server_id: GuildId,
     administration_channel_id: ChannelId,
     submissions_channel_id: ChannelId,
+    uploader_worker_base_url: String,
     r2_base_url: String,
     worker_auth_key_secret: String,
     reqwest_client: reqwest::Client
@@ -76,6 +77,8 @@ async fn main() {
         .parse()
         .expect("Error parsing FB_SUBMISSIONS_CHANNEL_ID into a channel id");
 
+    let uploader_worker_base_url = std::env::var("UPLOADER_WORKER_BASE_URL")
+        .expect("UPLOADER_WORKER_BASE_URL not provided");
 
     let worker_auth_key_secret = std::env::var("WORKER_AUTH_KEY_SECRET")
         .expect("WORKER_AUTH_KEY_SECRET not provided");
@@ -137,6 +140,7 @@ async fn main() {
                     worker_auth_key_secret,
                     r2_base_url,
                     reqwest_client,
+                    uploader_worker_base_url
                 })
             })
         })

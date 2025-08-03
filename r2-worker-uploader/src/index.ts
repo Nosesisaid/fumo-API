@@ -25,17 +25,10 @@ export default {
 
 
 		switch (request.method){
-			case "POST":
-				const body: ReqBody = await request.json();
-				if (!body.image_proxy_url) {
-					return new Response("Bad Request. You must provide an image_proxy_url", {status: 400})
-				}
-				const imageBuff = await fetch(body.image_proxy_url);
-				if (!imageBuff.ok || !imageBuff.body) {
-					let text = await imageBuff.text()
-					return new Response("Failed to fetch imaged. Got status "+imageBuff.status+ text,{status:502});
-				}
-				await env.FUMOS_BUCKET.put(key, imageBuff.body );
+			case "PUT":
+				
+				const imageBuff = request.body
+				await env.FUMOS_BUCKET.put(key, imageBuff);
 
 				return Response.json({key_in_bucket:key})
 			default: 
