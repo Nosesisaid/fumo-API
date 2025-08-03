@@ -5,7 +5,7 @@ use fumo_db::{
     models::{Fumo, NewFumo},
     operations::{PgConnection, add_fumo},
 };
-use poise::serenity_prelude::{CacheHttp, CreateActionRow, CreateButton, CreateEmbed, CreateMessage, InteractionType, UserId};
+use poise::serenity_prelude::{CacheHttp, CreateActionRow, CreateButton, CreateEmbed, CreateMessage, InteractionType, Request, Route, UserId};
 use poise::serenity_prelude::{CreateEmbedAuthor, Timestamp};
 use strum::{Display, EnumIter, EnumString, IntoStaticStr};
 
@@ -211,6 +211,8 @@ impl From<InteractionCustomID> for String {
 
 pub fn upload_to_cdn(proxy_img_url: impl Into<String>)->String {
     //TODO: Make it actually like upload to a cdn
+
+    
     proxy_img_url.into()
 
 }

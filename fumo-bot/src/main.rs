@@ -12,23 +12,12 @@ pub struct Data {
     admin_server_id: GuildId,
     administration_channel_id: ChannelId,
     submissions_channel_id: ChannelId,
+    r2_base_url: String,
+    worker_auth_key_secret: String,
+    reqwest_client: reqwest::Client
 }
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub type Context<'a> = poise::Context<'a, Data, Error>;
-
-// pub trait SayEphemeral<'a> {
-//     fn say_ephemeral(self, text: impl Into<String>) -> Result<ReplyHandle<'a>, serenity::Error>;
-// }
-
-// impl<'a> SayEphemeral<'a> for Context <'a>{
-//     async fn say_ephemeral(
-//         self,
-//         text: impl Into<String>,
-//     ) -> Result<ReplyHandle<'a>, serenity::Error> {
-//         poise::say_reply(self, text).await
-//     }
-// }
-// NO MORE TRAITS I hate rust, why did i think implementing my on trait was a good idea
 
 pub async fn say_ephemeral<'a>(
     ctx: Context<'a>,
@@ -87,6 +76,15 @@ async fn main() {
         .parse()
         .expect("Error parsing FB_SUBMISSIONS_CHANNEL_ID into a channel id");
 
+
+    let worker_auth_key_secret = std::env::var("WORKER_AUTH_KEY_SECRET")
+        .expect("WORKER_AUTH_KEY_SECRET not provided");
+    let r2_base_url = std::env::var("R2_BASE_URL")
+    .expect("R2_BASE_URL not provided");
+
+
+    let reqwest_client = reqwest::Client::new();
+
     let global_commands = vec![ping()];
     let admin_server_commands = vec![admin_server::fumo(), admin_server::new()];
 
@@ -136,6 +134,9 @@ async fn main() {
                     admin_server_id,
                     administration_channel_id,
                     submissions_channel_id,
+                    worker_auth_key_secret,
+                    r2_base_url,
+                    reqwest_client,
                 })
             })
         })
