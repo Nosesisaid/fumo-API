@@ -1,9 +1,11 @@
+use std::{str::FromStr, vec};
+
 use crate::{Data, Error};
 use fumo_db::{
     models::{Fumo, NewFumo},
     operations::{PgConnection, add_fumo},
 };
-use poise::serenity_prelude::{CacheHttp, CreateEmbed, CreateMessage, UserId};
+use poise::serenity_prelude::{CacheHttp, CreateActionRow, CreateButton, CreateEmbed, CreateMessage, InteractionType, UserId};
 use poise::serenity_prelude::{CreateEmbedAuthor, Timestamp};
 use strum::{Display, EnumIter, EnumString, IntoStaticStr};
 
@@ -38,13 +40,36 @@ pub fn insert_fumo(
         let data = data.ok_or("If you are dispatching the insertion you must pass on the data")?;
         let administration_channel = data.administration_channel_id;
         let embed = build_embed_from_newfumo(&to_insert);
+        let (submitter_id, submission_id) = extract_submitter(&to_insert.submitter);
+
         tokio::task::block_in_place(||  {
 
             tokio::runtime::Handle::current().block_on(async {
-            let m = administration_channel.send_message(ctx, CreateMessage::new().add_embed(embed)).await;
+
+                let accept_button_id = InteractionCustomID{
+                    action: InteractionAction::Accept,
+                    submission_id: submission_id,
+                    submitter_id: submitter_id.into()
+                };
+
+
+                let delete_button_id = InteractionCustomID{
+                    action: InteractionAction::Delete,
+                    submission_id: submission_id,
+                    submitter_id: submitter_id.into()
+                };
+
+                let msg = CreateMessage::new().add_embed(embed).components(
+                    vec![
+                        CreateActionRow::Buttons(vec![
+                            CreateButton::new(accept_button_id).label("Accept").style(poise::serenity_prelude::ButtonStyle::Success),
+                            CreateButton::new(delete_button_id).label("Delete").emoji('🚮').style(poise::serenity_prelude::ButtonStyle::Danger)
+                            ])
+                        ]);
+            let m = administration_channel.send_message(ctx,msg ).await;
             
             match m {
-                Err(e) => println!("Error dispatching insert_fumo to the administration channel {}",e),
+                Err(e) => tracing::warn!("Error dispatching insert_fumo to the administration channel {}",e),
                 _ =>{}
             }
             
@@ -109,3 +134,65 @@ fn extract_submitter(submitter_string: &String) -> (UserId, u64) {
 
     return (UserId::new(submitter_id), submission_id);
 }
+
+
+pub trait ToShortStr {
+    fn to_short_str(&self) -> String;
+}
+
+impl ToShortStr for InteractionType {
+    fn to_short_str(&self) -> String {
+        match self {
+            InteractionType::Autocomplete => "autc",
+            InteractionType::Component => "cpnt",
+            InteractionType::Modal => "modl",
+            _ => "unkn"
+        }.into()
+    }
+}
+
+#[derive(EnumString, Display)]
+pub enum InteractionAction {
+    Accept,
+    Submit,
+    Delete,
+    Unknown
+}
+
+
+
+pub struct InteractionCustomID {
+//    interaction_kind: InteractionType,
+    pub submission_id: u64,
+    pub submitter_id: u64,
+    pub action: InteractionAction
+}
+
+impl InteractionCustomID {
+    pub fn new(id: impl Into<String>) -> Self {
+
+        let id: String = id.into();
+        let id = id.split("-").into_iter().collect::<Vec<&str>>();
+
+        let submission_id: u64 = id[0].parse().unwrap();
+        let submitter_id: u64 = id[1].parse().unwrap();
+        let action: InteractionAction = InteractionCustomID::interaction_action_from_short_str(id[2]).unwrap_or(InteractionAction::Unknown);
+        InteractionCustomID { submission_id, submitter_id, action }
+    }
+
+    pub fn interaction_action_from_short_str(action: &str) -> Result<InteractionAction, strum::ParseError>{
+        InteractionAction::from_str(action)
+    }
+}
+
+impl From<InteractionCustomID> for String {
+    fn from(value: InteractionCustomID) -> Self {
+        dbg![format!(
+        "{}-{}-{}",
+        value.submission_id.to_string(),
+        value.submitter_id.to_string(),
+        value.action
+        )]
+    }
+}
+

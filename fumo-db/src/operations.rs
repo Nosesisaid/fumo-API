@@ -48,17 +48,9 @@ pub fn fetch_fumos(
 pub fn add_fumo(conn: &mut PgConnection, fumo_to_add: NewFumo) -> QueryResult<Fumo> {
     if fumo_to_add.involved
             .iter()
-            .filter_map(|element| {
-                element.as_ref().and_then(|e| {
-                    if INVOLVABLE.contains(&e.as_str()) {
-                        Some(e)
-                    } else {
-                        None
-                    }
-                })
-            })
-            .count()
-            > 0
+            .any(|f| {
+                f.is_none()||  (f.is_some() && !is_valid_involvable(f.as_ref().unwrap()))
+})
     {
         return Err(diesel::result::Error::DeserializationError(
             "Invalid involved array provided".into(),
