@@ -48,7 +48,7 @@ async fn main() {
 
     println!("Hello, world!. Trying to listen on {port}");
 
-    let address = SocketAddr::from(([127, 0, 0, 1], port));
+    let address = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
