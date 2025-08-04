@@ -13,6 +13,8 @@ REST API documentation is yet to be done. This project consists of 3 crates: `fu
 Each has a readme.txt explaining how it works and specific information about it's dev environment.
 
 ## Contributing and running it locally
+You can contribute with images to the fumo-API through the [official Discord server](https://discord.gg/3df68Hg6jF). Sorry for using Discord but this was the best option. 
+
 if you would like something to be different or have any suggestion, please [open an issue](https://github.com/nosesisaid/fumo-api/issues/new).
 
 To see how to start contributing or set up dev-environment, please read the CONTRIBUTING.md
