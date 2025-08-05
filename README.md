@@ -9,7 +9,7 @@
 
 ![logo](https://repository-images.githubusercontent.com/395606928/753b9fdd-b978-4b74-841e-f3973daf9129)
 ## Documentation
-REST API documentation is yet to be done. This project consists of 3 crates: `fumo-db, fumo-rest-api, fumo-bot` and two cloudflare workers: `fumo-rest-api` & `fumo-web`.
+REST API documentation is yet to be done. This project consists of 3 crates: `fumo-db, fumo-rest-api, fumo-bot` and two cloudflare workers: `r2-worker-uploader` & `fumo-web`.
 
 
 - The fumo-db is a library crate which fumo-bot and fumo-rest-api use to access and update the postgres database
