@@ -58,15 +58,17 @@ async fn main() {
 
     let reqwest_client = reqwest::Client::new();
 
-    let global_commands = vec![global::ping()];
-    let admin_server_commands = vec![admin_server::fumo(), admin_server::new()];
+    let global_commands = vec![global::ping(), global::fumo(), global::random()];
+    let admin_server_commands = vec![admin_server::new_fumo()];
 
+    // I feel dumb as hell, IDK how to merge two vectors into one so I guess I'll also do this manually
+    let all_commands = vec![global::ping(), global::fumo(), global::random(), admin_server::new_fumo()];
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![global::ping(), admin_server::fumo(), admin_server::new()],
+            commands: all_commands,
             event_handler: |ctx, event, framework, data| {
                 Box::pin(event_handler::event_handler(ctx, event, framework, data))
             },

@@ -120,7 +120,7 @@ pub fn edit_involved(
 
 pub fn get_random(
     conn: &mut PgConnection,
-    fumo: Option<String>,
+    involv: Option<String>,
     include_not_public: bool
 ) -> QueryResult<APIFumo>{
 
@@ -130,7 +130,7 @@ pub fn get_random(
         query = query.filter(public.eq(true));
     }
 
-    if let Some(fumo) = fumo {
+    if let Some(fumo) = involv {
         query = query.filter(involved.contains(vec![fumo]));
     } 
 

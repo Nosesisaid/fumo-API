@@ -1,6 +1,25 @@
 
+use fumo_db::models::APIFumo;
+use poise::serenity_prelude::CreateEmbed;
+
 use crate::{Error,Context};
 
+
+
+#[poise::command(slash_command, subcommands("random"), subcommand_required)]
+pub async fn fumo(_: Context<'_>) -> Result<(), Error> {
+    Ok(())
+}
+
+
+#[poise::command(slash_command)]
+pub async fn random(ctx: Context<'_>) -> Result<(), Error> {
+
+    let mut conn = ctx.data().db.get()?;
+
+    let new_fumo = fumo_db::operations::get_random(&mut conn, None, false);
+    Ok(())
+}
 
 #[poise::command(slash_command, prefix_command)]
 pub async fn ping(
@@ -19,4 +38,12 @@ pub async fn ping(
     );
     ctx.say(response).await?;
     Ok(())
+}
+
+
+async fn create_embed_for_apifumo(f: &APIFumo) -> CreateEmbed{
+    CreateEmbed::new()
+        .image(&f.img)
+        .title(format!("Fumo #{}",&f.id ))
+        .description(format!("{}",&f.involved.iter().map(|a|a.clone().unwrap()).collect::<Vec<String>>().join("")))
 }

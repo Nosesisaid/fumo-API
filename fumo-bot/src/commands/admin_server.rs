@@ -9,13 +9,8 @@ use crate::util::say_ephemeral;
 use fumo_db::models::NewFumo;
 use poise::serenity_prelude::{self as serenity};
 
-#[poise::command(slash_command, subcommands("new"), subcommand_required)]
-pub async fn fumo(_: Context<'_>) -> Result<(), Error> {
-    Ok(())
-}
-
 #[poise::command(slash_command, user_cooldown = 5)]
-pub async fn new(
+pub async fn new_fumo(
     ctx: Context<'_>,
     #[description = "Image of the fumo"] image: serenity::Attachment,
     #[description = "Involved fumos on the image"] involved: Option<InvolvableChoice>,
