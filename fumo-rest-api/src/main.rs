@@ -1,8 +1,9 @@
 use std::{env, net::SocketAddr};
 
-use axum::{Router, routing::get};
+use axum::{http::{HeaderValue, Method}, routing::get, Router};
 use dotenvy::dotenv;
 use fumo_db::{DbPool, create_pool};
+use tower_http::cors::CorsLayer;
 
 use crate::{admin_router::admin, fumos_router::fumo};
 
@@ -44,6 +45,7 @@ async fn main() {
         // .merge(admin())
         .merge(fumo())
         .merge(admin())
+        .layer(CorsLayer::new().allow_origin("*".parse::<HeaderValue>().unwrap()).allow_methods([Method::GET]))
         .with_state(api_state);
 
     println!("Hello, world!. Trying to listen on {port}");
