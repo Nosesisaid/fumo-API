@@ -21,7 +21,7 @@ pub async fn random(ctx: Context<'_>) -> Result<(), Error> {
 
     let embed = create_embed_for_apifumo(&random_fumo);
 
-    ctx.reply_builder(CreateReply::default().embed(embed));
+    ctx.send(CreateReply::default().embed(embed)).await?;
     Ok(())
 }
 
