@@ -69,7 +69,14 @@ async fn component_interaction_handler(
 
             }
             crate::util::InteractionAction::Delete => {
-                todo!()
+                let submission_public_thread = ChannelId::new(custom_id.submission_id);
+                let submission_admin_message = interaction.message.clone();
+
+                submission_public_thread.say(ctx, "Submission rejected :(").await?;
+
+                interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("Submission deleted").ephemeral(true)).await?;
+                submission_admin_message.delete(ctx).await?;
+                
             }
             _ => {}
 
