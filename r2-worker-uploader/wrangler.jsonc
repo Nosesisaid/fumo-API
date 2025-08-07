@@ -1,0 +1,16 @@
+
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "r2-worker-uploader",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-08-03",
+	"observability": {
+		"enabled": true
+	},
+	"r2_buckets": [
+		{
+			"binding": "FUMOS_BUCKET",
+			"bucket_name": "fumos-cdn-staging" //!ATTENTION If selfhosting, make sure to update the bucket name
+		}
+	]
+}

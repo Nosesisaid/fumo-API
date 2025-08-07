@@ -1,0 +1,126 @@
+use fumo_db::DbPool;
+use poise::{
+    ReplyHandle,
+    serenity_prelude::{self as serenity, ChannelId, GuildId},
+};
+#[path = "commands/admin_server.rs"]
+mod admin_server;
+#[path ="commands/global.rs"]
+mod global;
+pub mod event_handler;
+pub mod util;
+pub struct Data {
+    db: DbPool,
+    admin_server_id: GuildId,
+    administration_channel_id: ChannelId,
+    submissions_channel_id: ChannelId,
+    uploader_worker_base_url: String,
+    r2_base_url: String,
+    worker_auth_key_secret: String,
+    reqwest_client: reqwest::Client
+}
+pub type Error = Box<dyn std::error::Error + Send + Sync>;
+pub type Context<'a> = poise::Context<'a, Data, Error>;
+
+
+#[tokio::main]
+async fn main() {
+    
+    tracing_subscriber::fmt::init();
+
+    _ = dbg!(dotenvy::dotenv());
+
+    let discord_token =
+        std::env::var("FB_DISCORD_API_TOKEN").expect("FB_DISCORD_API_TOKEN not provided");
+    let database_url = std::env::var("FB_DATABASE_URL").expect("FB_DATABASE_URL not provided");
+
+    let admin_server_id: GuildId = std::env::var("FB_ADMIN_SERVER_ID")
+        .expect("FB_ADMIN_SERVER_ID not provided")
+        .parse()
+        .expect("Error parsing FB_ADMIN_SERVER_ID into a server id");
+    let administration_channel_id: ChannelId = std::env::var("FB_ADMINISTRATION_CHANNEL_ID")
+        .expect("FB_ADMINISTRATION_CHANNEL_ID not provided")
+        .parse()
+        .expect("Error parsing FB_ADMINISTRATION_CHANNEL_ID into a channel id");
+    let submissions_channel_id: ChannelId = std::env::var("FB_SUBMISSIONS_CHANNEL_ID")
+        .expect("FB_SUBMISSIONS_CHANNEL_ID not provided")
+        .parse()
+        .expect("Error parsing FB_SUBMISSIONS_CHANNEL_ID into a channel id");
+
+    let uploader_worker_base_url = std::env::var("UPLOADER_WORKER_BASE_URL")
+        .expect("UPLOADER_WORKER_BASE_URL not provided");
+
+    let worker_auth_key_secret = std::env::var("WORKER_AUTH_KEY_SECRET")
+        .expect("WORKER_AUTH_KEY_SECRET not provided");
+    let r2_base_url = std::env::var("R2_BASE_URL")
+    .expect("R2_BASE_URL not provided");
+
+
+    let reqwest_client = reqwest::Client::new();
+
+    let global_commands = vec![global::ping(), global::fumo(), global::random()];
+    let admin_server_commands = vec![admin_server::new_fumo()];
+
+    // I feel dumb as hell, IDK how to merge two vectors into one so I guess I'll also do this manually
+    let all_commands = vec![global::ping(), global::fumo(), global::random(), admin_server::new_fumo()];
+    let intents =
+        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
+
+    let framework = poise::Framework::builder()
+        .options(poise::FrameworkOptions {
+            commands: all_commands,
+            event_handler: |ctx, event, framework, data| {
+                Box::pin(event_handler::event_handler(ctx, event, framework, data))
+            },
+            pre_command: |ctx| {
+                Box::pin(async move {
+                    println!("Executing command {}...", ctx.command().qualified_name);
+                })
+            },
+            ..Default::default()
+        })
+        .setup(move |ctx, ready, framework| {
+            Box::pin(async move {
+                let pool = fumo_db::create_pool(database_url);
+                println!("Connected to the db pool!");
+                println!("Logged in as {}", ready.user.name);
+                poise::builtins::register_globally(ctx, &global_commands).await?;
+                println!(
+                    "Succesfully registered {:?} as global commands",
+                    &global_commands
+                        .iter()
+                        .map(|c| &c.name)
+                        .collect::<Vec<&String>>()
+                );
+
+                poise::builtins::register_in_guild(ctx, &admin_server_commands, admin_server_id)
+                    .await?;
+                println!(
+                    "Succesfully registered {:?} as commands for {}",
+                    &admin_server_commands
+                        .iter()
+                        .map(|c| &c.name)
+                        .collect::<Vec<&String>>(),
+                    &admin_server_id
+                );
+
+                Ok(Data {
+                    db: pool,
+                    admin_server_id,
+                    administration_channel_id,
+                    submissions_channel_id,
+                    worker_auth_key_secret,
+                    r2_base_url,
+                    reqwest_client,
+                    uploader_worker_base_url
+                })
+            })
+        })
+        .build();
+
+    let client = serenity::ClientBuilder::new(discord_token, intents)
+        .framework(framework)
+        .await;
+
+    client.unwrap().start().await.unwrap();
+}

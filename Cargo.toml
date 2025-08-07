@@ -1,0 +1,4 @@
+[workspace]
+members = ["fumo-rest-api", "fumo-bot", "fumo-db"]
+resolver = "3"
+
