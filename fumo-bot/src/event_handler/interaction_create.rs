@@ -31,8 +31,9 @@ async fn component_interaction_handler(
 
         let mut conn = data.db.get()?;
 
-        let submsission_message = data.submissions_channel_id.message(ctx, custom_id.submission_id).await?; 
+        let submission_message = data.submissions_channel_id.message(ctx, custom_id.submission_id).await?; 
 
+        //Errors are not handled here since 
         interaction.defer(ctx).await?;
         match custom_id.action {
             crate::util::InteractionAction::Accept => {
@@ -45,9 +46,9 @@ async fn component_interaction_handler(
                 let entry_id: i64 = interaction.message.content.trim().parse()?;
 
                 
-                let new_image_url = upload_to_cdn(&entry_id,&submsission_message.attachments.first().ok_or("Attachment not found on submission message.")?.proxy_url, &data).await?;
+                let new_image_url = upload_to_cdn(&entry_id,&submission_message.attachments.first().ok_or("Attachment not found on submission message.")?.proxy_url, &data).await?;
 
-                let followup = interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("Trying to approve entry...")).await?;
+                let followup = interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("Trying to approve entry...")).await;
             
                 let res = fumo_db::operations::approve_entry(&mut conn, entry_id, Some(new_image_url));
 
@@ -55,12 +56,17 @@ async fn component_interaction_handler(
                     Ok(f) => {
                                    submission_admin_message.edit(ctx, EditMessage::new().components(vec![])).await?;
 
-                        submission_public_thread.say(ctx, "Accepted :)").await?;
-                        dbg!(submission_public_thread.edit_thread(ctx, EditThread::new().archived(true).locked(true)).await?);
+                        submission_public_thread.say(ctx, "Accepted :)").await;
+                        submission_public_thread.edit_thread(ctx, EditThread::new().archived(true).locked(true)).await;
+
+                        if let Ok(followup) = followup{
                         interaction.edit_followup(ctx, followup.id, CreateInteractionResponseFollowup::new().content("Succesfully accepted, entry is now public")).await?;
+                        }
                     }
                     Err(e)=>{
+                        if let Ok(followup) = followup {
                         interaction.edit_followup(ctx, followup.id, CreateInteractionResponseFollowup::new().content("Error updating the db. Not updated")).await?;
+                        }
           
                         return Err(e.into());
 
@@ -72,7 +78,7 @@ async fn component_interaction_handler(
                 let submission_public_thread = ChannelId::new(custom_id.submission_id);
                 let submission_admin_message = interaction.message.clone();
 
-                submission_public_thread.say(ctx, "Submission rejected :(").await?;
+                submission_public_thread.say(ctx, "Submission rejected :(").await;
 
                 interaction.create_followup(ctx, CreateInteractionResponseFollowup::new().content("Submission deleted").ephemeral(true)).await?;
                 submission_admin_message.delete(ctx).await?;
