@@ -1,6 +1,6 @@
 # fumo API 
 >[!IMPORTANT]
-> # This version is deprecated. V3 is almost ready. Take a look at [#26](https://github.com/Nosesisaid/fumo-API/pull/26)
+> # [V3](https://github.com/Nosesisaid/fumo-API/tree/v3) is ready and the one you should use but in alpha stage until further testing. [#26](https://github.com/Nosesisaid/fumo-API/pull/26).
 
 [![Tests](https://github.com/Nosesisaid/fumo-API/actions/workflows/tests.yml/badge.svg)](https://github.com/Nosesisaid/fumo-API/actions/workflows/tests.yml)
 
